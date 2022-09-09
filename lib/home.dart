@@ -15,6 +15,8 @@ class _HomeState extends State<Home> {
   final dio = Dio(); // Provide a dio instance// config your dio headers globally
   late RestClient client;
   Map<String, PaletteGenerator> paletteMap = {};
+  int page = 0;
+  List<dynamic>? digimon = [];
 
   @override
   void initState() {
@@ -35,19 +37,23 @@ class _HomeState extends State<Home> {
       ),
       body: Center(
         child: FutureBuilder<Content>(
-            future: client.getAllDigimon(),
+            future: client.getPaginatedDigimon(page),
             builder: (context, AsyncSnapshot<Content> snapshot) {
               if (snapshot.hasError) {
                 return const Text("error");
               } else {
+                //add all
+                snapshot.data?.content?.forEach((element) {
+                  digimon?.add(element);
+                });
+                digimon = digimon?.toSet().toList();
                 return ListWheelScrollView.useDelegate(
                   itemExtent: 350,
                   squeeze: 1.1,
                   physics: const FixedExtentScrollPhysics(),
                   perspective: 0.0013,
-                  onSelectedItemChanged: (index) => print(index),
-                  childDelegate: ListWheelChildBuilderDelegate(
-                      childCount: snapshot.data?.content?.length, builder: (context, index) => cardView(Digimon.$DigimonFromJson(snapshot.data?.content?[index]))),
+                  onSelectedItemChanged: (index) => _updateList(index, digimon?.length),
+                  childDelegate: ListWheelChildBuilderDelegate(childCount: digimon?.length, builder: (context, index) => cardView(Digimon.$DigimonFromJson(digimon?[index]))),
                 );
               }
             }),
@@ -62,7 +68,7 @@ class _HomeState extends State<Home> {
             future: client.getDigimon("${item.id}"),
             builder: (context, AsyncSnapshot<DigimonDetails> snapshot) {
               if (snapshot.hasError) {
-                return CircularProgressIndicator(value: 0);
+                return CircularProgressIndicator();
               } else {
                 print(snapshot.data);
                 final image = snapshot.data?.images?[0]['href'];
@@ -70,19 +76,19 @@ class _HomeState extends State<Home> {
                     future: !paletteMap.containsKey(image) ? _generatePalette(snapshot.data) : _localGen(image),
                     builder: (context, AsyncSnapshot<PaletteGenerator?> snapshot2) {
                       if (snapshot2.hasError) {
-                        return CircularProgressIndicator(value: 0);
+                        return CircularProgressIndicator();
                       } else if (snapshot2.hasData) {
                         paletteMap[image] = snapshot2.data!;
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
-                            decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: snapshot2.data!.vibrantColor!.color, width: 15)),
+                            decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true), width: 15)),
                             child: Container(
-                              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: snapshot2.data!.darkMutedColor!.color, width: 10)),
+                              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, false), width: 10)),
                               child: Container(
                                 width: MediaQuery.of(context).size.width / 1.5,
                                 height: 300,
-                                decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: snapshot2.data!.vibrantColor!.color, width: 5)),
+                                decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true), width: 5)),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -112,14 +118,14 @@ class _HomeState extends State<Home> {
                           ),
                         );
                       } else {
-                        return CircularProgressIndicator(value: 0);
+                        return CircularProgressIndicator();
                       }
                     });
               }
             }),
       );
     } else {
-      return CircularProgressIndicator(value: 0);
+      return CircularProgressIndicator();
     }
   }
 
@@ -136,5 +142,35 @@ class _HomeState extends State<Home> {
 
   Future<PaletteGenerator?> _localGen(String href) async {
     return paletteMap[href];
+  }
+
+  _updateList(int index, size) {
+    bool endOfList = index >= size - 1;
+    if (endOfList) {
+      page++;
+      setState(() {
+        print("Reloading List");
+      });
+    }
+  }
+
+  Color _getColor(PaletteGenerator generator, bool isVibrant) {
+    if (isVibrant) {
+      if (generator.vibrantColor != null) {
+        return generator.vibrantColor!.color;
+      } else {
+        if (generator.darkVibrantColor != null) {
+          return generator.darkVibrantColor!.color;
+        } else {
+          return Colors.black;
+        }
+      }
+    } else {
+      if (generator.dominantColor != null) {
+        return generator.dominantColor!.color;
+      } else {
+        return Colors.black;
+      }
+    }
   }
 }

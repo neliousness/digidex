@@ -9,7 +9,7 @@ abstract class RestClient {
   factory RestClient(Dio dio, {String baseUrl}) = _RestClient;
 
   @GET("/digimon")
-  Future<Content> getAllDigimon();
+  Future<Content> getPaginatedDigimon(@Query("page") int page);
 
   @GET("/digimon/{id}")
   Future<DigimonDetails> getDigimon(@Path("id") String id);
