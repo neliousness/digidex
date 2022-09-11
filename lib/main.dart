@@ -26,7 +26,8 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const Home(),
+      initialRoute: Home.id,
+      routes: {Home.id: (context) => const Home()},
     );
   }
 }

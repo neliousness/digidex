@@ -1,10 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:clickable_list_wheel_view/clickable_list_wheel_widget.dart';
 import 'package:digidexplus/utils/retro-client.dart';
+import 'package:digidexplus/views/digimon_details.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 class Home extends StatefulWidget {
+  static var id = '/home';
   const Home({Key? key}) : super(key: key);
 
   @override
@@ -16,7 +19,12 @@ class _HomeState extends State<Home> {
   late RestClient client;
   Map<String, PaletteGenerator> paletteMap = {};
   int page = 0;
-  List<dynamic>? digimon = [];
+  List<Digimon>? digimon = [];
+  final _scrollController = FixedExtentScrollController();
+
+  late PaletteGenerator _currentGenerator;
+  late DigimonDetails _digimonDetails;
+  late String _imageLink;
 
   @override
   void initState() {
@@ -44,16 +52,33 @@ class _HomeState extends State<Home> {
               } else {
                 //add all
                 snapshot.data?.content?.forEach((element) {
-                  digimon?.add(element);
+                  digimon?.add(Digimon.$DigimonFromJson(element));
                 });
                 digimon = digimon?.toSet().toList();
-                return ListWheelScrollView.useDelegate(
-                  itemExtent: 350,
-                  squeeze: 1.1,
-                  physics: const FixedExtentScrollPhysics(),
-                  perspective: 0.0013,
-                  onSelectedItemChanged: (index) => _updateList(index, digimon?.length),
-                  childDelegate: ListWheelChildBuilderDelegate(childCount: digimon?.length, builder: (context, index) => cardView(Digimon.$DigimonFromJson(digimon?[index]))),
+                return ClickableListWheelScrollView(
+                  itemHeight: 350,
+                  itemCount: digimon!.length,
+                  onItemTapCallback: (index) {
+                    print("onItemTapCallback index: $index");
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DigimonDetailsView(
+                                  paletteGenerator: _currentGenerator,
+                                  imageLink: _imageLink,
+                                  details: _digimonDetails,
+                                )));
+                  },
+                  scrollController: _scrollController,
+                  child: ListWheelScrollView.useDelegate(
+                    controller: _scrollController,
+                    itemExtent: 350,
+                    squeeze: 1.1,
+                    physics: const FixedExtentScrollPhysics(),
+                    perspective: 0.0013,
+                    onSelectedItemChanged: (index) => _updateList(index, digimon?.length),
+                    childDelegate: ListWheelChildBuilderDelegate(childCount: digimon?.length, builder: (context, index) => cardView((digimon?[index]))),
+                  ),
                 );
               }
             }),
@@ -61,14 +86,14 @@ class _HomeState extends State<Home> {
     );
   }
 
-  cardView(Digimon? item) {
+  Widget cardView(Digimon? item) {
     if (item != null && item.id! > -1) {
       return Center(
         child: FutureBuilder<DigimonDetails>(
             future: client.getDigimon("${item.id}"),
             builder: (context, AsyncSnapshot<DigimonDetails> snapshot) {
               if (snapshot.hasError) {
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
               } else {
                 print(snapshot.data);
                 final image = snapshot.data?.images?[0]['href'];
@@ -79,16 +104,21 @@ class _HomeState extends State<Home> {
                         return CircularProgressIndicator();
                       } else if (snapshot2.hasData) {
                         paletteMap[image] = snapshot2.data!;
+                        _currentGenerator = snapshot2.data!;
+                        _digimonDetails = snapshot.data!;
+                        _imageLink = image;
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
                             decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true), width: 15)),
                             child: Container(
-                              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, false), width: 10)),
+                              decoration: BoxDecoration(
+                                  color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true).withOpacity(0.5), width: 10)),
                               child: Container(
                                 width: MediaQuery.of(context).size.width / 1.5,
                                 height: 300,
-                                decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true), width: 5)),
+                                decoration: BoxDecoration(
+                                    color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true).withOpacity(0.3), width: 5)),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
                                   mainAxisAlignment: MainAxisAlignment.center,
