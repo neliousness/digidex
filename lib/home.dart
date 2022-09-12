@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clickable_list_wheel_view/clickable_list_wheel_widget.dart';
 import 'package:digidexplus/utils/retro-client.dart';
-import 'package:digidexplus/views/digimon_details.dart';
+import 'package:digidexplus/views/digimon_details_view.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
@@ -59,7 +59,7 @@ class _HomeState extends State<Home> {
                   itemHeight: 350,
                   itemCount: digimon!.length,
                   onItemTapCallback: (index) {
-                    print("onItemTapCallback index: $index");
+                    print("onItemTapCallback index: $index ${_digimonDetails.name}");
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -127,10 +127,13 @@ class _HomeState extends State<Home> {
                                     SizedBox(
                                       width: 150,
                                       height: 150,
-                                      child: CachedNetworkImage(
-                                        imageUrl: image,
-                                        progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
-                                        errorWidget: (context, url, error) => Icon(Icons.error),
+                                      child: Hero(
+                                        tag: image,
+                                        child: CachedNetworkImage(
+                                          imageUrl: image,
+                                          progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+                                          errorWidget: (context, url, error) => Icon(Icons.error),
+                                        ),
                                       ),
                                     ),
                                     Padding(

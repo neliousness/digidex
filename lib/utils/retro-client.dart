@@ -37,6 +37,14 @@ class Digimon {
 
   Digimon({this.id = -1, this.name = "N/A", this.href = "N/A"});
 
+  @override
+  bool operator ==(Object other) {
+    return other != null && other is Digimon && hashCode == other.hashCode;
+  }
+
+  @override
+  int get hashCode => id!;
+
   static $DigimonFromJson(dynamic json) {
     if (json != null) {
       return Digimon(id: json['id'], name: json['name'], href: json['href']);
@@ -61,14 +69,26 @@ class DigimonDetails {
   String? name;
   bool? xAntibody;
   List<dynamic>? images;
+  List<dynamic>? types;
+  List<dynamic>? levels;
+  List<dynamic>? attributes;
+  List<dynamic>? fields;
 
-  DigimonDetails({this.id, this.name, this.xAntibody, this.images});
+  DigimonDetails({this.id, this.name, this.xAntibody, this.images, this.types, this.levels, this.attributes, this.fields});
 
   factory DigimonDetails.fromJson(Map<String, dynamic> json) => $DigimonDetailsFromJson(json);
 
   static $DigimonDetailsFromJson(dynamic json) {
     if (json != null) {
-      return DigimonDetails(id: json['id'], name: json['name'], xAntibody: json['xAntibody'], images: json['images']);
+      return DigimonDetails(
+          id: json['id'],
+          name: json['name'],
+          xAntibody: json['xAntibody'],
+          images: json['images'],
+          types: json['types'],
+          levels: json['levels'],
+          attributes: json['attributes'],
+          fields: json['fields']);
     }
     return DigimonDetails();
   }
