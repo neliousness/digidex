@@ -73,22 +73,25 @@ class DigimonDetails {
   List<dynamic>? levels;
   List<dynamic>? attributes;
   List<dynamic>? fields;
+  List<dynamic>? descriptions;
 
-  DigimonDetails({this.id, this.name, this.xAntibody, this.images, this.types, this.levels, this.attributes, this.fields});
+  DigimonDetails({this.id, this.name, this.xAntibody, this.images, this.types, this.levels, this.attributes, this.fields, this.descriptions});
 
   factory DigimonDetails.fromJson(Map<String, dynamic> json) => $DigimonDetailsFromJson(json);
 
   static $DigimonDetailsFromJson(dynamic json) {
     if (json != null) {
       return DigimonDetails(
-          id: json['id'],
-          name: json['name'],
-          xAntibody: json['xAntibody'],
-          images: json['images'],
-          types: json['types'],
-          levels: json['levels'],
-          attributes: json['attributes'],
-          fields: json['fields']);
+        id: json['id'],
+        name: json['name'],
+        xAntibody: json['xAntibody'],
+        images: json['images'],
+        types: json['types'],
+        levels: json['levels'],
+        attributes: json['attributes'],
+        fields: json['fields'],
+        descriptions: json['descriptions'],
+      );
     }
     return DigimonDetails();
   }

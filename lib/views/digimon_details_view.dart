@@ -228,29 +228,48 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                       length: 4,
                       child: Column(
                         children: [
-                          const TabBar(
-                            indicatorColor: Colors.white,
-                            tabs: [
-                              Tab(
-                                text: "About",
-                              ),
-                              Tab(
-                                text: "Skills",
-                              ),
-                              Tab(
-                                text: "Evolution",
-                              ),
-                              Tab(
-                                text: "Fields",
-                              )
-                            ],
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: TabBar(
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              indicatorColor: Colors.white,
+                              tabs: [
+                                Tab(
+                                  text: "About",
+                                ),
+                                Tab(
+                                  text: "Skills",
+                                ),
+                                Tab(
+                                  text: "Evolution",
+                                ),
+                                Tab(
+                                  text: "Fields",
+                                )
+                              ],
+                            ),
                           ),
                           SizedBox(
                             width: MediaQuery.of(context).size.width,
                             height: MediaQuery.of(context).size.height / 2.5,
                             child: TabBarView(
                               children: [
-                                Icon(Icons.directions_car),
+                                //About
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height / 3,
+                                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Text(
+                                        widget.details!.descriptions!.isNotEmpty ? "${widget.details!.descriptions![1]["description"]}" : "N/A",
+                                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[600]),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                                 Icon(Icons.directions_transit),
                                 Icon(Icons.directions_bike),
                                 Icon(Icons.directions_bike),
