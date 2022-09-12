@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:digidexplus/components/skill_item.dart';
 import 'package:digidexplus/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -10,6 +11,7 @@ class DigimonDetailsView extends StatefulWidget {
   final PaletteGenerator? paletteGenerator;
   final DigimonDetails? details;
   final String imageLink;
+
   const DigimonDetailsView({Key? key, required this.paletteGenerator, required this.details, required this.imageLink}) : super(key: key);
 
   @override
@@ -17,6 +19,15 @@ class DigimonDetailsView extends StatefulWidget {
 }
 
 class _DigimonDetailsViewState extends State<DigimonDetailsView> {
+  List<SkillItem> skills = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _generateSkills();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +36,7 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
           children: [
             Container(
               color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true).withOpacity(0.7)),
-              height: MediaQuery.of(context).size.height / 3,
+              height: MediaQuery.of(context).size.height / 2.8,
               width: MediaQuery.of(context).size.width,
               child: Stack(
                 children: [
@@ -37,17 +48,36 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                     alignment: Alignment.topCenter,
                     child: Padding(
                       padding: const EdgeInsets.only(top: 30.0),
-                      child: SizedBox(
-                        width: 215,
-                        height: 215,
-                        child: Hero(
-                          tag: widget.imageLink,
-                          child: CachedNetworkImage(
-                            imageUrl: widget.imageLink,
-                            progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
-                            errorWidget: (context, url, error) => Icon(Icons.error),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 215,
+                            height: 215,
+                            child: Hero(
+                              tag: widget.imageLink,
+                              child: CachedNetworkImage(
+                                imageUrl: widget.imageLink,
+                                progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+                                errorWidget: (context, url, error) => Icon(Icons.error),
+                              ),
+                            ),
                           ),
-                        ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true)), width: 1), borderRadius: BorderRadius.circular(16)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  widget.details!.types!.isNotEmpty ? "${widget.details?.types?[0]['type']}" : 'N/A',
+                                  style: TextStyle(color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true)), fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                     ),
                   ),
@@ -66,23 +96,6 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border.all(color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true)), width: 1), borderRadius: BorderRadius.circular(16)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            widget.details!.types!.isNotEmpty ? "${widget.details?.types?[0]['type']}" : 'N/A',
-                            style: TextStyle(color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true)), fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
                 ],
               ),
             ),
@@ -106,13 +119,25 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   //Digimon name
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      "${widget.details!.name}",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Text(
+                          "${widget.details!.name}",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 7.0, left: MediaQuery.of(context).size.width / 2.8, right: MediaQuery.of(context).size.width / 2.8),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 3,
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                        ),
+                      )
+                    ],
                   ),
                   //attribs
                   Padding(
@@ -137,8 +162,8 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                               ),
                               Column(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 16.0),
+                                  const Padding(
+                                    padding: EdgeInsets.only(bottom: 16.0),
                                     child: Text(
                                       "Level",
                                       style: TextStyle(color: Colors.grey, fontSize: 16),
@@ -251,8 +276,9 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                           ),
                           SizedBox(
                             width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height / 2.5,
+                            height: MediaQuery.of(context).size.height / 1.831,
                             child: TabBarView(
+                              physics: const NeverScrollableScrollPhysics(),
                               children: [
                                 //About
                                 Padding(
@@ -270,7 +296,13 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                                     ),
                                   ),
                                 ),
-                                Icon(Icons.directions_transit),
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: skills.length,
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return skills[index];
+                                  },
+                                ),
                                 Icon(Icons.directions_bike),
                                 Icon(Icons.directions_bike),
                               ],
@@ -287,6 +319,14 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
         ),
       ),
     );
+  }
+
+  _generateSkills() {
+    widget.details!.skills!.forEach((element) {
+      skills.add(
+        SkillItem(name: element['skill'], description: element['description'], themeColor: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
+      );
+    });
   }
 
   Color _getColor(PaletteGenerator generator, bool isVibrant) {

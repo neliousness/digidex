@@ -43,6 +43,7 @@ dependencies:
   http: ^0.13.5
   clickable_list_wheel_view: ^0.2.0
   flutter_svg: ^1.0.3
+  expandable: ^5.0.1
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,8 @@ flutter:
    - assets/images/svgs/level.svg
    - assets/images/svgs/xantibody.svg
    - assets/images/svgs/attribute.svg
+   - assets/images/svgs/back_arrow.svg
+   - assets/images/svgs/skill.svg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

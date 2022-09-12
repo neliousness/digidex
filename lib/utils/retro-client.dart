@@ -74,8 +74,9 @@ class DigimonDetails {
   List<dynamic>? attributes;
   List<dynamic>? fields;
   List<dynamic>? descriptions;
+  List<dynamic>? skills;
 
-  DigimonDetails({this.id, this.name, this.xAntibody, this.images, this.types, this.levels, this.attributes, this.fields, this.descriptions});
+  DigimonDetails({this.id, this.name, this.xAntibody, this.images, this.types, this.levels, this.attributes, this.fields, this.descriptions, this.skills});
 
   factory DigimonDetails.fromJson(Map<String, dynamic> json) => $DigimonDetailsFromJson(json);
 
@@ -91,6 +92,7 @@ class DigimonDetails {
         attributes: json['attributes'],
         fields: json['fields'],
         descriptions: json['descriptions'],
+        skills: json['skills'],
       );
     }
     return DigimonDetails();
@@ -101,4 +103,13 @@ class DigimonDetails {
 class Image {
   String? href;
   bool? transparent;
+}
+
+class Skill {
+  int? id;
+  String? skills;
+  String? translation;
+  String? description;
+
+  Skill(this.id, this.skills, this.translation, this.description);
 }
