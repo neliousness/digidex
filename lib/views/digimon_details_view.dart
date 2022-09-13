@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:digidexplus/components/field_item.dart';
 import 'package:digidexplus/components/skill_item.dart';
 import 'package:digidexplus/utils/color_utils.dart';
 import 'package:flutter/material.dart';
@@ -19,13 +20,15 @@ class DigimonDetailsView extends StatefulWidget {
 }
 
 class _DigimonDetailsViewState extends State<DigimonDetailsView> {
-  List<SkillItem> skills = [];
+  List<SkillItem> _skills = [];
+  List<FieldItem> _fields = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _generateSkills();
+    _generateFields();
   }
 
   @override
@@ -102,7 +105,6 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
             //Details
             Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -276,7 +278,7 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                           ),
                           SizedBox(
                             width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height / 1.831,
+                            height: MediaQuery.of(context).size.height / 1.8,
                             child: TabBarView(
                               physics: const NeverScrollableScrollPhysics(),
                               children: [
@@ -296,15 +298,32 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                                     ),
                                   ),
                                 ),
+                                //Skills
                                 ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: skills.length,
+                                  shrinkWrap: false,
+                                  itemCount: _skills.length,
                                   itemBuilder: (BuildContext context, int index) {
-                                    return skills[index];
+                                    return _skills[index];
                                   },
                                 ),
-                                Icon(Icons.directions_bike),
-                                Icon(Icons.directions_bike),
+                                //Evolution
+                                ListView.builder(
+                                  shrinkWrap: false,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: _skills.length,
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return _skills[index];
+                                  },
+                                ),
+                                //Fields
+                                ListView.builder(
+                                  shrinkWrap: false,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: _fields.length,
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return _fields[index];
+                                  },
+                                ),
                               ],
                             ),
                           ),
@@ -323,8 +342,16 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
 
   _generateSkills() {
     widget.details!.skills!.forEach((element) {
-      skills.add(
+      _skills.add(
         SkillItem(name: element['skill'], description: element['description'], themeColor: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
+      );
+    });
+  }
+
+  _generateFields() {
+    widget.details!.fields!.forEach((element) {
+      _fields.add(
+        FieldItem(name: element['field'], themeColor: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
       );
     });
   }

@@ -62,10 +62,12 @@ class _SkillItemState extends State<SkillItem> {
                         )
                       ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0, top: 15),
-                      child: Visibility(visible: !collapsed, child: Text(widget.description)),
-                    )
+                    Visibility(
+                        visible: !collapsed,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0, top: 15),
+                          child: Text(widget.description),
+                        ))
                   ],
                 ),
                 Align(alignment: Alignment.topRight, child: collapsed ? Icon(Icons.keyboard_arrow_down_rounded) : Icon(Icons.keyboard_arrow_up_rounded))
