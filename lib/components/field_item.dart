@@ -40,7 +40,7 @@ class _FieldItemState extends State<FieldItem> {
                     padding: const EdgeInsets.only(left: 10.0),
                     child: Text(
                       widget.name,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   )
                 ],

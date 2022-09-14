@@ -78,6 +78,8 @@ flutter:
    - assets/images/svgs/back_arrow.svg
    - assets/images/svgs/skill.svg
    - assets/images/svgs/field.svg
+   - assets/images/svgs/up_arrow.svg
+   - assets/images/svgs/mass.svg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
@@ -101,5 +103,13 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+
+  fonts:
+    - family: Comfortaa
+      fonts:
+        - asset: fonts/Comfortaa-Bold.ttf
+    - family: Aldrich
+      fonts:
+        - asset: fonts/Aldrich-Regular.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

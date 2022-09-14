@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clickable_list_wheel_view/clickable_list_wheel_widget.dart';
+import 'package:digidexplus/utils/digimon_utils.dart';
 import 'package:digidexplus/utils/retro-client.dart';
 import 'package:digidexplus/views/digimon_details_view.dart';
 import 'package:dio/dio.dart';
@@ -67,6 +68,7 @@ class _HomeState extends State<Home> {
                                   paletteGenerator: _currentGenerator,
                                   imageLink: _imageLink,
                                   details: _digimonDetails,
+                                  client: client,
                                 )));
                   },
                   scrollController: _scrollController,
@@ -98,7 +100,7 @@ class _HomeState extends State<Home> {
                 print(snapshot.data);
                 final image = snapshot.data?.images?[0]['href'];
                 return FutureBuilder<PaletteGenerator?>(
-                    future: !paletteMap.containsKey(image) ? _generatePalette(snapshot.data) : _localGen(image),
+                    future: !paletteMap.containsKey(image) ? DigimonUtils.generatePalette(snapshot.data) : _localGen(image),
                     builder: (context, AsyncSnapshot<PaletteGenerator?> snapshot2) {
                       if (snapshot2.hasError) {
                         return CircularProgressIndicator();
@@ -160,17 +162,6 @@ class _HomeState extends State<Home> {
     } else {
       return CircularProgressIndicator();
     }
-  }
-
-  Future<PaletteGenerator?> _generatePalette(DigimonDetails? details) async {
-    String href = details?.images?[0]['href'];
-    NetworkImage image = NetworkImage(href);
-    return await PaletteGenerator.fromImageProvider(
-      image,
-      region: Offset.zero & Size(250, 250),
-      size: Size(250, 250),
-      maximumColorCount: 20,
-    );
   }
 
   Future<PaletteGenerator?> _localGen(String href) async {

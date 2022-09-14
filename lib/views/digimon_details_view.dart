@@ -2,18 +2,21 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:digidexplus/components/field_item.dart';
 import 'package:digidexplus/components/skill_item.dart';
 import 'package:digidexplus/utils/color_utils.dart';
+import 'package:digidexplus/utils/digimon_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:palette_generator/palette_generator.dart';
 
+import '../components/evolution_item.dart';
 import '../utils/retro-client.dart';
 
 class DigimonDetailsView extends StatefulWidget {
   final PaletteGenerator? paletteGenerator;
   final DigimonDetails? details;
   final String imageLink;
+  final RestClient client;
 
-  const DigimonDetailsView({Key? key, required this.paletteGenerator, required this.details, required this.imageLink}) : super(key: key);
+  const DigimonDetailsView({Key? key, required this.paletteGenerator, required this.details, required this.imageLink, required this.client}) : super(key: key);
 
   @override
   _DigimonDetailsViewState createState() => _DigimonDetailsViewState();
@@ -22,14 +25,7 @@ class DigimonDetailsView extends StatefulWidget {
 class _DigimonDetailsViewState extends State<DigimonDetailsView> {
   List<SkillItem> _skills = [];
   List<FieldItem> _fields = [];
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _generateSkills();
-    _generateFields();
-  }
+  List<EvolutionItem> _evolutions = [];
 
   @override
   Widget build(BuildContext context) {
@@ -164,16 +160,16 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                               ),
                               Column(
                                 children: [
-                                  const Padding(
+                                  Padding(
                                     padding: EdgeInsets.only(bottom: 16.0),
                                     child: Text(
                                       "Level",
-                                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                                      style: TextStyle(color: Colors.grey[700], fontSize: 14),
                                     ),
                                   ),
                                   Text(
                                     widget.details!.levels!.isNotEmpty ? "${widget.details?.levels?[0]['level']}" : "N/A",
-                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
                                   ),
                                 ],
                               )
@@ -191,22 +187,22 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               SvgPicture.asset(
-                                "assets/images/svgs/xantibody.svg",
+                                "assets/images/svgs/mass.svg",
                                 width: 40,
                                 color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true)),
                               ),
                               Column(
                                 children: [
-                                  const Padding(
+                                  Padding(
                                     padding: EdgeInsets.only(bottom: 16.0),
                                     child: Text(
                                       "X-Antibody",
-                                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                                      style: TextStyle(color: Colors.grey[700], fontSize: 14),
                                     ),
                                   ),
                                   Text(
                                     widget.details!.xAntibody! ? "Yes" : "No",
-                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
                                   ),
                                 ],
                               )
@@ -230,16 +226,16 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                               ),
                               Column(
                                 children: [
-                                  const Padding(
+                                  Padding(
                                     padding: EdgeInsets.only(bottom: 16.0),
                                     child: Text(
                                       "Attribute",
-                                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                                      style: TextStyle(color: Colors.grey[700], fontSize: 14),
                                     ),
                                   ),
                                   Text(
                                     widget.details!.attributes!.isNotEmpty ? "${widget.details?.attributes?[0]['attribute']}" : "N/A",
-                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
                                   ),
                                 ],
                               )
@@ -258,7 +254,8 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                           const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: TabBar(
-                              indicatorSize: TabBarIndicatorSize.tab,
+                              indicatorSize: TabBarIndicatorSize.label,
+                              labelPadding: EdgeInsets.only(right: 0),
                               indicatorColor: Colors.white,
                               tabs: [
                                 Tab(
@@ -292,38 +289,53 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                                     child: Padding(
                                       padding: const EdgeInsets.all(12.0),
                                       child: Text(
-                                        widget.details!.descriptions!.isNotEmpty ? "${widget.details!.descriptions![1]["description"]}" : "N/A",
+                                        DigimonUtils.getDescription(widget.details!.descriptions!, "en_us"),
                                         style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[600]),
                                       ),
                                     ),
                                   ),
                                 ),
                                 //Skills
-                                ListView.builder(
-                                  shrinkWrap: false,
-                                  itemCount: _skills.length,
-                                  itemBuilder: (BuildContext context, int index) {
-                                    return _skills[index];
-                                  },
-                                ),
+                                FutureBuilder(
+                                    future: _generateSkills(),
+                                    builder: (context, AsyncSnapshot<List<SkillItem>?> snapshot) {
+                                      if (snapshot.hasData) {
+                                        return ListView.builder(
+                                          shrinkWrap: false,
+                                          itemCount: snapshot.data!.length,
+                                          itemBuilder: (BuildContext context, int index) {
+                                            return snapshot.data![index];
+                                          },
+                                        );
+                                      } else {
+                                        return CircularProgressIndicator();
+                                      }
+                                    }),
                                 //Evolution
-                                ListView.builder(
-                                  shrinkWrap: false,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: _skills.length,
-                                  itemBuilder: (BuildContext context, int index) {
-                                    return _skills[index];
-                                  },
-                                ),
+                                FutureBuilder(
+                                    future: _generateEvolutions(),
+                                    builder: (context, AsyncSnapshot<List<EvolutionItem>?> snapshot) {
+                                      return ListView.builder(
+                                        shrinkWrap: false,
+                                        itemCount: _evolutions.length,
+                                        itemBuilder: (BuildContext context, int index) {
+                                          return _evolutions[index];
+                                        },
+                                      );
+                                    }),
                                 //Fields
-                                ListView.builder(
-                                  shrinkWrap: false,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: _fields.length,
-                                  itemBuilder: (BuildContext context, int index) {
-                                    return _fields[index];
-                                  },
-                                ),
+                                FutureBuilder(
+                                    future: _generateFields(),
+                                    builder: (context, AsyncSnapshot<List<FieldItem>?> snapshot) {
+                                      return ListView.builder(
+                                        shrinkWrap: false,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: _fields.length,
+                                        itemBuilder: (BuildContext context, int index) {
+                                          return _fields[index];
+                                        },
+                                      );
+                                    }),
                               ],
                             ),
                           ),
@@ -340,20 +352,64 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
     );
   }
 
-  _generateSkills() {
-    widget.details!.skills!.forEach((element) {
-      _skills.add(
-        SkillItem(name: element['skill'], description: element['description'], themeColor: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
-      );
-    });
+  Future<List<SkillItem>> _generateSkills() async {
+    if (_skills.isEmpty) {
+      _skills = widget.details!.skills!
+          .map((element) => SkillItem(name: element['skill'], description: element['description'], themeColor: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))))
+          .toList();
+      return _skills;
+    }
+    return _skills;
   }
 
-  _generateFields() {
-    widget.details!.fields!.forEach((element) {
-      _fields.add(
-        FieldItem(name: element['field'], themeColor: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
-      );
-    });
+  Future<List<FieldItem>> _generateFields() async {
+    if (_fields.isEmpty) {
+      _fields = widget.details!.fields!
+          .map(
+            (element) => FieldItem(name: element['field'], themeColor: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
+          )
+          .toList();
+      return _fields;
+    }
+    return _fields;
+  }
+
+  Future<List<EvolutionItem>> _generateEvolutions() async {
+    if (_evolutions.isEmpty) {
+      List<EvolutionItem> nextEvolutions = [];
+      if (widget.details!.nextEvolutions!.isNotEmpty) {
+        nextEvolutions = widget.details!.nextEvolutions!
+            .where((element) => DigimonUtils.isValidEvolution(element))
+            .map(
+              (element) => EvolutionItem(
+                  client: widget.client,
+                  name: element['digimon'],
+                  isNextEvolution: true,
+                  id: element['id'],
+                  themeColor: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
+            )
+            .toList();
+      }
+
+      List<EvolutionItem> priorEvolutions = [];
+      if (widget.details!.priorEvolutions!.isNotEmpty) {
+        priorEvolutions = widget.details!.priorEvolutions!
+            .where((element) => DigimonUtils.isValidEvolution(element))
+            .map(
+              (element) => EvolutionItem(
+                  client: widget.client,
+                  name: element['digimon'],
+                  isNextEvolution: false,
+                  id: element['id'],
+                  themeColor: ColorUtils.darken(_getColor(widget.paletteGenerator!, true))),
+            )
+            .toList();
+      }
+
+      _evolutions = nextEvolutions + priorEvolutions;
+      return _evolutions;
+    }
+    return _evolutions;
   }
 
   Color _getColor(PaletteGenerator generator, bool isVibrant) {

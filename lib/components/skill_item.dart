@@ -66,7 +66,10 @@ class _SkillItemState extends State<SkillItem> {
                         visible: !collapsed,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 8.0, top: 15),
-                          child: Text(widget.description),
+                          child: Text(
+                            widget.description,
+                            style: TextStyle(color: Colors.grey[700]),
+                          ),
                         ))
                   ],
                 ),
