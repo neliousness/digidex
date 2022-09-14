@@ -19,7 +19,7 @@ class DigimonUtils {
   }
 
   static getDescription(List<dynamic>? descriptions, String language) {
-    String description = descriptions!.isNotEmpty ? descriptions.where((element) => element['language'] == language).first['description'] : null;
+    var description = descriptions!.isNotEmpty ? descriptions.where((element) => element['language'] == language).first['description'] : null;
     return description != null ? description : "N/A";
   }
 }

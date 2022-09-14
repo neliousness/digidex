@@ -1,14 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:clickable_list_wheel_view/clickable_list_wheel_widget.dart';
+import 'package:digidexplus/components/digimon_card.dart';
 import 'package:digidexplus/utils/digimon_utils.dart';
 import 'package:digidexplus/utils/retro-client.dart';
-import 'package:digidexplus/views/digimon_details_view.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:stacked_listview/stacked_listview.dart';
 
 class Home extends StatefulWidget {
   static var id = '/home';
+
   const Home({Key? key}) : super(key: key);
 
   @override
@@ -20,12 +20,7 @@ class _HomeState extends State<Home> {
   late RestClient client;
   Map<String, PaletteGenerator> paletteMap = {};
   int page = 0;
-  List<Digimon>? digimon = [];
-  final _scrollController = FixedExtentScrollController();
-
-  late PaletteGenerator _currentGenerator;
-  late DigimonDetails _digimonDetails;
-  late String _imageLink;
+  List<DigimonCard>? digimon = [];
 
   @override
   void initState() {
@@ -34,6 +29,17 @@ class _HomeState extends State<Home> {
 
     dio.options.headers["Demo-Header"] = "demo header"; // config your dio headers globally
     client = RestClient(dio);
+    _loadItems();
+  }
+
+  _loadItems() {
+    client.getPaginatedDigimon(page).then((values) {
+      values.content?.forEach((element) {
+        print("content $element");
+        Digimon item = Digimon.$DigimonFromJson(element);
+        client.getDigimon("${item.id}").then((details) => _getPaletteGenerator(details));
+      });
+    });
   }
 
   @override
@@ -41,127 +47,144 @@ class _HomeState extends State<Home> {
     // use block pattern
     return Scaffold(
       appBar: AppBar(
-        title: Text("DigiDex"),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: Text(
+          "DigiDex",
+          style: TextStyle(color: Colors.grey[800], fontSize: 20),
+        ),
         centerTitle: true,
       ),
       body: Center(
-        child: FutureBuilder<Content>(
-            future: client.getPaginatedDigimon(page),
-            builder: (context, AsyncSnapshot<Content> snapshot) {
-              if (snapshot.hasError) {
-                return const Text("error");
-              } else {
-                //add all
-                snapshot.data?.content?.forEach((element) {
-                  digimon?.add(Digimon.$DigimonFromJson(element));
-                });
-                digimon = digimon?.toSet().toList();
-                return ClickableListWheelScrollView(
-                  itemHeight: 350,
-                  itemCount: digimon!.length,
-                  onItemTapCallback: (index) {
-                    print("onItemTapCallback index: $index ${_digimonDetails.name}");
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => DigimonDetailsView(
-                                  paletteGenerator: _currentGenerator,
-                                  imageLink: _imageLink,
-                                  details: _digimonDetails,
-                                  client: client,
-                                )));
-                  },
-                  scrollController: _scrollController,
-                  child: ListWheelScrollView.useDelegate(
-                    controller: _scrollController,
-                    itemExtent: 350,
-                    squeeze: 1.1,
-                    physics: const FixedExtentScrollPhysics(),
-                    perspective: 0.0013,
-                    onSelectedItemChanged: (index) => _updateList(index, digimon?.length),
-                    childDelegate: ListWheelChildBuilderDelegate(childCount: digimon?.length, builder: (context, index) => cardView((digimon?[index]))),
-                  ),
-                );
-              }
-            }),
+        child: StackedListView(
+          padding: EdgeInsets.only(left: 20, right: 20, top: 50),
+          itemCount: digimon!.length,
+          itemExtent: 400,
+          heightFactor: 0.7,
+          fadeOutFrom: 0.7,
+          onRemove: (index) {
+            _updateList(index, digimon!.length);
+            setState(() {
+              digimon!.removeAt(index);
+            });
+          },
+          builder: (_, index) {
+            return digimon![index];
+          },
+        ),
       ),
     );
   }
 
-  Widget cardView(Digimon? item) {
-    if (item != null && item.id! > -1) {
-      return Center(
-        child: FutureBuilder<DigimonDetails>(
-            future: client.getDigimon("${item.id}"),
-            builder: (context, AsyncSnapshot<DigimonDetails> snapshot) {
-              if (snapshot.hasError) {
-                return const CircularProgressIndicator();
-              } else {
-                print(snapshot.data);
-                final image = snapshot.data?.images?[0]['href'];
-                return FutureBuilder<PaletteGenerator?>(
-                    future: !paletteMap.containsKey(image) ? DigimonUtils.generatePalette(snapshot.data) : _localGen(image),
-                    builder: (context, AsyncSnapshot<PaletteGenerator?> snapshot2) {
-                      if (snapshot2.hasError) {
-                        return CircularProgressIndicator();
-                      } else if (snapshot2.hasData) {
-                        paletteMap[image] = snapshot2.data!;
-                        _currentGenerator = snapshot2.data!;
-                        _digimonDetails = snapshot.data!;
-                        _imageLink = image;
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true), width: 15)),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true).withOpacity(0.5), width: 10)),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width / 1.5,
-                                height: 300,
-                                decoration: BoxDecoration(
-                                    color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true).withOpacity(0.3), width: 5)),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width: 150,
-                                      height: 150,
-                                      child: Hero(
-                                        tag: image,
-                                        child: CachedNetworkImage(
-                                          imageUrl: image,
-                                          progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
-                                          errorWidget: (context, url, error) => Icon(Icons.error),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "${item.name}",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      } else {
-                        return CircularProgressIndicator();
-                      }
-                    });
-              }
-            }),
-      );
-    } else {
-      return CircularProgressIndicator();
-    }
+  // Widget cardView(Digimon? item) {
+  //   if (item != null && item.id! > -1) {
+  //     return Center(
+  //       child: FutureBuilder<DigimonDetails>(
+  //           future: client.getDigimon("${item.id}"),
+  //           builder: (context, AsyncSnapshot<DigimonDetails> snapshot) {
+  //             if (snapshot.hasError) {
+  //               return const CircularProgressIndicator();
+  //             } else {
+  //               print(snapshot.data);
+  //               final image = snapshot.data?.images?[0]['href'];
+  //               return FutureBuilder<PaletteGenerator?>(
+  //                   future: !paletteMap.containsKey(image) ? DigimonUtils.generatePalette(snapshot.data) : _localGen(image),
+  //                   builder: (context, AsyncSnapshot<PaletteGenerator?> snapshot2) {
+  //                     if (snapshot2.hasError) {
+  //                       return CircularProgressIndicator();
+  //                     } else if (snapshot2.hasData) {
+  //                       paletteMap[image] = snapshot2.data!;
+  //                       return GestureDetector(
+  //                         onTap: () {
+  //                           Navigator.push(
+  //                               context,
+  //                               MaterialPageRoute(
+  //                                   builder: (context) =>
+  //                                       DigimonDetailsView(
+  //                                         paletteGenerator: snapshot2.data,
+  //                                         imageLink: image,
+  //                                         details: snapshot.data,
+  //                                         client: client,
+  //                                       )));
+  //                         },
+  //                         child: Padding(
+  //                           padding: const EdgeInsets.all(8.0),
+  //                           child: Container(
+  //                             decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true), width: 15)),
+  //                             child: Container(
+  //                               decoration: BoxDecoration(
+  //                                   color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true).withOpacity(0.5), width: 10)),
+  //                               child: Container(
+  //                                 width: MediaQuery
+  //                                     .of(context)
+  //                                     .size
+  //                                     .width / 1.5,
+  //                                 height: 300,
+  //                                 decoration: BoxDecoration(
+  //                                     color: Colors.white, shape: BoxShape.circle, border: Border.all(color: _getColor(snapshot2.data!, true).withOpacity(0.3), width: 5)),
+  //                                 child: Column(
+  //                                   mainAxisSize: MainAxisSize.max,
+  //                                   mainAxisAlignment: MainAxisAlignment.center,
+  //                                   crossAxisAlignment: CrossAxisAlignment.center,
+  //                                   children: [
+  //                                     SizedBox(
+  //                                       width: 150,
+  //                                       height: 150,
+  //                                       child: Hero(
+  //                                         tag: image,
+  //                                         child: CachedNetworkImage(
+  //                                           imageUrl: image,
+  //                                           progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+  //                                           errorWidget: (context, url, error) => Icon(Icons.error),
+  //                                         ),
+  //                                       ),
+  //                                     ),
+  //                                     Padding(
+  //                                       padding: const EdgeInsets.all(8.0),
+  //                                       child: Text(
+  //                                         "${item.name}",
+  //                                         textAlign: TextAlign.center,
+  //                                         style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+  //                                       ),
+  //                                     ),
+  //                                   ],
+  //                                 ),
+  //                               ),
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       );
+  //                     } else {
+  //                       return CircularProgressIndicator();
+  //                     }
+  //                   });
+  //             }
+  //           }),
+  //     );
+  //   } else {
+  //     return CircularProgressIndicator();
+  //   }
+  // }
+
+  _getPaletteGenerator(DigimonDetails details) async {
+    final image = details.images?[0]['href'];
+    Future<PaletteGenerator?> gen = !paletteMap.containsKey(image) ? DigimonUtils.generatePalette(details) : _localGen(image);
+    gen.then((palette) => _itemBuilder(details, palette!));
+  }
+
+  _itemBuilder(DigimonDetails details, PaletteGenerator generator) async {
+    final image = details.images?[0]['href'];
+    paletteMap[image] = generator;
+    setState(() {
+      digimon!.add(DigimonCard(
+        client: client,
+        paletteGenerator: generator,
+        details: details,
+        imageLink: image,
+      ));
+    });
+
+    digimon = digimon?.toSet().toList();
   }
 
   Future<PaletteGenerator?> _localGen(String href) async {
@@ -169,32 +192,14 @@ class _HomeState extends State<Home> {
   }
 
   _updateList(int index, size) {
+    print(index);
+    print(size);
     bool endOfList = index >= size - 1;
     if (endOfList) {
       page++;
       setState(() {
         print("Reloading List");
       });
-    }
-  }
-
-  Color _getColor(PaletteGenerator generator, bool isVibrant) {
-    if (isVibrant) {
-      if (generator.vibrantColor != null) {
-        return generator.vibrantColor!.color;
-      } else {
-        if (generator.darkVibrantColor != null) {
-          return generator.darkVibrantColor!.color;
-        } else {
-          return Colors.black;
-        }
-      }
-    } else {
-      if (generator.dominantColor != null) {
-        return generator.dominantColor!.color;
-      } else {
-        return Colors.black;
-      }
     }
   }
 }
