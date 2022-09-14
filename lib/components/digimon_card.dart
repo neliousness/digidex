@@ -12,19 +12,19 @@ class DigimonCard extends StatefulWidget {
   final String? imageLink;
   final RestClient client;
 
-  const DigimonCard({Key? key, this.paletteGenerator, this.details, this.imageLink, required this.client}) : super(key: key);
+  const DigimonCard({
+    Key? key,
+    this.paletteGenerator,
+    this.details,
+    this.imageLink,
+    required this.client,
+  }) : super(key: key);
 
   @override
   _DigimonCardState createState() => _DigimonCardState();
 }
 
 class _DigimonCardState extends State<DigimonCard> {
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -83,6 +83,11 @@ class _DigimonCardState extends State<DigimonCard> {
         ),
       ),
     );
-    ;
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 }
