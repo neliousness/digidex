@@ -7,6 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 import 'components/stacked_list.dart';
+import 'utils/color_utils.dart';
 
 class Home extends StatefulWidget {
   static var id = '/home';
@@ -27,6 +28,7 @@ class _HomeState extends State<Home> {
   final ScrollController _controller = ScrollController();
 
   bool loading = false;
+  Color color = Colors.blue;
 
   @override
   void initState() {
@@ -48,31 +50,21 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     // use block pattern
     return Scaffold(
-      // appBar: AppBar(
-      //   elevation: 0,
-      //   backgroundColor: Colors.transparent,
-      //   title: Column(
-      //     mainAxisSize: MainAxisSize.min,
-      //     children: [
-      //       Padding(
-      //         padding: const EdgeInsets.all(8.0),
-      //         child: Text(
-      //           "DigiDex",
-      //           style: TextStyle(color: Colors.grey[800], fontSize: 20),
-      //         ),
-      //       ),
-      //       Visibility(
-      //           child: SpinKitFadingCube(
-      //         color: Colors.grey[800],
-      //         size: 20.0,
-      //       ))
-      //     ],
-      //   ),
-      //   centerTitle: true,
-      // ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
+      body: AnimatedContainer(
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOut,
+        decoration: BoxDecoration(
+            gradient: LinearGradient(
+          colors: [
+            ColorUtils.darken(color.withOpacity(0.7)),
+            color.withOpacity(0.005),
+          ],
+          begin: const FractionalOffset(1.0, 1.0),
+          end: const FractionalOffset(1.0, 0.1),
+          stops: [0.1, 1.0],
+        )),
+        child: SingleChildScrollView(
+          child: SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -94,17 +86,20 @@ class _HomeState extends State<Home> {
                         ))
                   ],
                 ),
-                StackedListView(
-                  controller: _controller,
-                  key: _scaffoldKey,
-                  padding: EdgeInsets.only(left: 20, right: 20, top: 20),
-                  itemCount: digimon!.length,
-                  itemExtent: 400,
-                  heightFactor: 0.7,
-                  fadeOutFrom: 0.7,
-                  builder: (_, index) {
-                    return digimon![index];
-                  },
+                SizedBox(
+                  height: MediaQuery.of(context).size.height,
+                  child: StackedListView(
+                    controller: _controller,
+                    key: _scaffoldKey,
+                    padding: EdgeInsets.only(left: 20, right: 20, top: 20),
+                    itemCount: digimon!.length,
+                    itemExtent: 400,
+                    heightFactor: 0.7,
+                    fadeOutFrom: 0.7,
+                    builder: (_, index) {
+                      return digimon![index];
+                    },
+                  ),
                 ),
               ],
             ),
@@ -151,6 +146,15 @@ class _HomeState extends State<Home> {
 
   _initlisteners() {
     _controller.addListener(() {
+      int index = (_controller.position.pixels / 290).ceil();
+
+      DigimonCard card = digimon![index];
+
+      setState(() {
+        color = ColorUtils.getColor(card.paletteGenerator!, true);
+      });
+
+      print(" index $index");
       bool end = _controller.position.pixels > 0 && _controller.position.atEdge;
       _updateList(end);
     });
