@@ -91,7 +91,7 @@ class _HomeState extends State<Home> {
                   child: StackedListView(
                     controller: _controller,
                     key: _scaffoldKey,
-                    padding: EdgeInsets.only(left: 20, right: 20, top: 20),
+                    padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
                     itemCount: digimon!.length,
                     itemExtent: 400,
                     heightFactor: 0.7,
