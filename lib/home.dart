@@ -1,12 +1,15 @@
 import 'package:digidexplus/components/digimon_card.dart';
-import 'package:digidexplus/utils/digimon_utils.dart';
 import 'package:digidexplus/utils/retro-client.dart';
+import 'package:digidexplus/viewmodels/digimon_viewmodel.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:provider/provider.dart';
 
 import 'components/stacked_list.dart';
+import 'models/digimon.dart';
+import 'models/digimon_details.dart';
 import 'utils/color_utils.dart';
 
 class Home extends StatefulWidget {
@@ -19,32 +22,35 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final dio = Dio(); // Provide a dio instance// config your dio headers globally
+  final dio = Dio();
   late RestClient client;
-  Map<String, PaletteGenerator> paletteMap = {};
+  late DigimonViewModel _digimonViewModel;
+  late dynamic _digimonListener;
+
   int page = 0;
   List<DigimonCard>? digimon = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _controller = ScrollController();
 
   bool loading = false;
-  Color color = Colors.blue;
+  Color bgColor = Colors.blue;
+  double scale = 2.86;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
-    dio.options.headers["Demo-Header"] = "demo header"; // config your dio headers globally
     client = RestClient(dio);
+
+    _initListeners();
+    _initObservers();
     _loadItems();
-    _initlisteners();
   }
 
-  @override
-  void setState(fn) {
-    if (mounted) super.setState(fn);
-  }
+  // @override
+  // void setState(fn) {
+  //   if (mounted) super.setState(fn);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +62,8 @@ class _HomeState extends State<Home> {
         decoration: BoxDecoration(
             gradient: LinearGradient(
           colors: [
-            ColorUtils.darken(color.withOpacity(0.7)),
-            color.withOpacity(0.005),
+            ColorUtils.darken(bgColor.withOpacity(0.7)),
+            bgColor.withOpacity(0.005),
           ],
           begin: const FractionalOffset(1.0, 1.0),
           end: const FractionalOffset(1.0, 0.1),
@@ -109,15 +115,12 @@ class _HomeState extends State<Home> {
     );
   }
 
-  _getPaletteGenerator(DigimonDetails details) async {
-    final image = details.images?[0]['href'];
-    Future<PaletteGenerator?> gen = !paletteMap.containsKey(image) ? DigimonUtils.generatePalette(details) : _localGen(image);
-    gen.then((palette) => _itemBuilder(details, palette!));
-  }
+  _cardBuilder(DigiData data) async {
+    DigimonDetails details = data.details;
+    PaletteGenerator generator = data.generator;
 
-  _itemBuilder(DigimonDetails details, PaletteGenerator generator) async {
     final image = details.images?[0]['href'];
-    paletteMap[image] = generator;
+    _digimonViewModel.paletteMap[image] = generator;
     setState(() {
       digimon!.add(DigimonCard(
         client: client,
@@ -130,10 +133,6 @@ class _HomeState extends State<Home> {
     digimon = digimon?.toSet().toList();
   }
 
-  Future<PaletteGenerator?> _localGen(String href) async {
-    return paletteMap[href];
-  }
-
   _updateList(endOfList) {
     if (endOfList) {
       page++;
@@ -144,14 +143,34 @@ class _HomeState extends State<Home> {
     }
   }
 
-  _initlisteners() {
+  _loadItems() {
+    setState(() {
+      loading = true;
+    });
+    _digimonViewModel.loadData(page);
+  }
+
+  _initListeners() {
+    _initScrollControllerListener();
+    _initDigimonViewModelListener();
+  }
+
+  _initDigimonViewModelListener() {
+    _digimonListener = () {
+      _cardBuilder(_digimonViewModel.value as DigiData);
+    };
+  }
+
+  _initScrollControllerListener() {
     _controller.addListener(() {
-      int index = (_controller.position.pixels / 290).ceil();
+      int index = (_controller.position.pixels / (MediaQuery.of(context).size.height / scale)).ceil();
+      index = index < 0 ? 0 : index;
+      print(MediaQuery.of(context).size.height / scale);
 
       DigimonCard card = digimon![index];
 
       setState(() {
-        color = ColorUtils.getColor(card.paletteGenerator!, true);
+        bgColor = ColorUtils.getColor(card.paletteGenerator!, true);
       });
 
       print(" index $index");
@@ -160,16 +179,20 @@ class _HomeState extends State<Home> {
     });
   }
 
-  _loadItems() {
-    setState(() {
-      loading = true;
-    });
-    client.getPaginatedDigimon(page).then((values) {
-      values.content?.forEach((element) {
-        print("content $element");
-        Digimon item = Digimon.$DigimonFromJson(element);
-        client.getDigimon("${item.id}").then((details) => _getPaletteGenerator(details));
-      });
-    });
+  _initObservers() {
+    _initDigimonViewModelObserver();
+  }
+
+  _initDigimonViewModelObserver() {
+    _digimonViewModel = Provider.of<DigimonViewModel>(context, listen: false);
+    _digimonViewModel.init(client);
+    _digimonViewModel.addListener(_digimonListener);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _digimonViewModel.dispose();
+    _digimonListener.dispose();
   }
 }

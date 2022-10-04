@@ -2,6 +2,8 @@ import 'package:digidexplus/utils/retro-client.dart';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
+import '../models/digimon_details.dart';
+
 class DigimonUtils {
   static Future<PaletteGenerator?> generatePalette(DigimonDetails? details) async {
     String href = details?.images?[0]['href'];

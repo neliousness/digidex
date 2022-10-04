@@ -9,6 +9,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 import '../components/evolution_item.dart';
+import '../models/digimon_details.dart';
+import '../utils/curve_painter.dart';
 import '../utils/retro-client.dart';
 
 class DigimonDetailsView extends StatefulWidget {
@@ -426,28 +428,5 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
       return _evolutions;
     }
     return _evolutions;
-  }
-}
-
-class CurvePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint();
-    paint.color = Colors.white;
-    paint.style = PaintingStyle.fill; // Change this to fill
-
-    var path = Path();
-
-    path.moveTo(0, size.height * 0.80);
-    path.quadraticBezierTo(size.width / 2, size.height / 0.85, size.width, size.height * 0.80);
-    path.lineTo(size.width, 0);
-    path.lineTo(0, 0);
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
   }
 }

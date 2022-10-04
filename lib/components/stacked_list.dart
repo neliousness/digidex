@@ -185,7 +185,6 @@ class _AnimatedItemWidget extends State<AnimatedItemWidget> with TickerProviderS
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     animationController = AnimationController(
       duration: widget.animateDuration,
@@ -205,7 +204,6 @@ class _AnimatedItemWidget extends State<AnimatedItemWidget> with TickerProviderS
   }
 
   _animationStatus(AnimationStatus status) {
-    // print('animationStatus $confirmDelete');
     if (confirmDelete) widget.onRemove?.call(widget.index);
   }
 

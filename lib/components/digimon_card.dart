@@ -3,6 +3,7 @@ import 'package:digidexplus/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
+import '../models/digimon_details.dart';
 import '../utils/retro-client.dart';
 import '../views/digimon_details_view.dart';
 

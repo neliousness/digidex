@@ -32,7 +32,9 @@ class _SkillItemState extends State<SkillItem> {
       },
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 700),
+          curve: Curves.easeInOut,
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
