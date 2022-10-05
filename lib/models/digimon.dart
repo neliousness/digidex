@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../utils/constants.dart';
+
 @JsonSerializable()
 class Digimon {
   int? id;
@@ -18,7 +20,7 @@ class Digimon {
 
   static $DigimonFromJson(dynamic json) {
     if (json != null) {
-      return Digimon(id: json['id'], name: json['name'], href: json['href']);
+      return Digimon(id: json[kId], name: json[kName], href: json[kHref]);
     }
     return Digimon();
   }

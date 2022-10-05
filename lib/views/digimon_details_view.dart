@@ -3,6 +3,7 @@ import 'package:digidexplus/behavior/behavior.dart';
 import 'package:digidexplus/components/field_item.dart';
 import 'package:digidexplus/components/skill_item.dart';
 import 'package:digidexplus/utils/color_utils.dart';
+import 'package:digidexplus/utils/constants.dart';
 import 'package:digidexplus/utils/digimon_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -74,7 +75,7 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  widget.details!.types!.isNotEmpty ? "${widget.details?.types?[0]['type']}" : 'N/A',
+                                  widget.details!.types!.isNotEmpty ? "${widget.details?.types?[0]['type']}" : kNA,
                                   style: TextStyle(color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true)), fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -401,9 +402,9 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
             .map(
               (element) => EvolutionItem(
                   client: widget.client,
-                  name: element['digimon'],
+                  name: element[kDigimon],
                   isNextEvolution: true,
-                  id: element['id'],
+                  id: element[kId],
                   themeColor: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true))),
             )
             .toList();
@@ -416,9 +417,9 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
             .map(
               (element) => EvolutionItem(
                   client: widget.client,
-                  name: element['digimon'],
+                  name: element[kDigimon],
                   isNextEvolution: false,
-                  id: element['id'],
+                  id: element[kId],
                   themeColor: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true))),
             )
             .toList();

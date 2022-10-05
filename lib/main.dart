@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           // Notice that the counter didn't reset back to zero; the application
           // is not restarted.
           primarySwatch: Colors.blue,
-          fontFamily: kfontFamilyAldrich),
+          fontFamily: kFontFamilyAldrich),
       initialRoute: Home.id,
       routes: {Home.id: (context) => const Home()},
     );

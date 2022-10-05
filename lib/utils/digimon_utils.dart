@@ -1,12 +1,12 @@
-import 'package:digidexplus/utils/retro-client.dart';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 import '../models/digimon_details.dart';
+import 'constants.dart';
 
 class DigimonUtils {
   static Future<PaletteGenerator?> generatePalette(DigimonDetails? details) async {
-    String href = details?.images?[0]['href'];
+    String href = details?.images?[0][kHref];
     NetworkImage image = NetworkImage(href);
     return await PaletteGenerator.fromImageProvider(
       image,
@@ -17,7 +17,7 @@ class DigimonUtils {
   }
 
   static isValidEvolution(dynamic evolution) {
-    return evolution['id'] != null && evolution['digimon'] != null;
+    return evolution[kId] != null && evolution[kDigimon] != null;
   }
 
   static getDescription(List<dynamic>? descriptions, String language) {

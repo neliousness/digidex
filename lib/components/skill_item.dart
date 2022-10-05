@@ -7,13 +7,7 @@ class SkillItem extends StatefulWidget {
   final String description;
   final Color themeColor;
 
-  const SkillItem(
-      {Key? key,
-      this.name = "Super First",
-      this.description =
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. ",
-      required this.themeColor})
-      : super(key: key);
+  const SkillItem({Key? key, this.name = "", this.description = "", required this.themeColor}) : super(key: key);
 
   @override
   _SkillItemState createState() => _SkillItemState();

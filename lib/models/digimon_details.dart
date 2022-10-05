@@ -1,3 +1,4 @@
+import 'package:digidexplus/utils/constants.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 @JsonSerializable()
@@ -34,8 +35,8 @@ class DigimonDetails {
   static $DigimonDetailsFromJson(dynamic json) {
     if (json != null) {
       return DigimonDetails(
-        id: json['id'],
-        name: json['name'],
+        id: json[kId],
+        name: json[kName],
         xAntibody: json['xAntibody'],
         images: json['images'],
         types: json['types'],
