@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'home.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
       providers: [

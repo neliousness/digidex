@@ -64,7 +64,6 @@ class DigimonViewModel extends BaseViewModel {
     }
     _digimon = _digimon.toSet().toList();
     _loading = false;
-
     notifyListeners();
   }
 

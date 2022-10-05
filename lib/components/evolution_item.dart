@@ -24,7 +24,6 @@ class EvolutionItem extends StatefulWidget {
 
 class _EvolutionItemState extends State<EvolutionItem> {
   DigimonDetails? _details;
-  PaletteGenerator? _generator;
   String? _image;
 
   @override
@@ -85,8 +84,8 @@ class _EvolutionItemState extends State<EvolutionItem> {
                           Padding(
                             padding: const EdgeInsets.only(left: 10.0),
                             child: Text(
-                              widget.name,
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              DigimonUtils.formattedName(widget.name),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           )
                         ],

@@ -10,3 +10,6 @@ const String kName = 'name';
 //others
 const String kNA = 'N/A';
 const String kAppName = 'DigiDex';
+
+//assets
+const String kBackArrow = "assets/images/svgs/up_arrow.svg";

@@ -21,7 +21,18 @@ class DigimonUtils {
   }
 
   static getDescription(List<dynamic>? descriptions, String language) {
-    var description = descriptions!.isNotEmpty ? descriptions.where((element) => element['language'] == language).first['description'] : null;
-    return description != null ? description : "N/A";
+    try {
+      var description = descriptions!.isNotEmpty ? descriptions.where((element) => element['language'] == language).first['description'] : null;
+      return description != null ? description : "N/A";
+    } catch (e) {
+      return "N/A";
+    }
+  }
+
+  static String formattedName(String name) {
+    if (name.contains("(X-Antibody)")) {
+      return name.replaceAll("(X-Antibody)", "");
+    }
+    return name;
   }
 }

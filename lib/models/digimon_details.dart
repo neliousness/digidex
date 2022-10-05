@@ -1,6 +1,8 @@
 import 'package:digidexplus/utils/constants.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../utils/digimon_utils.dart';
+
 @JsonSerializable()
 class DigimonDetails {
   int? id;
@@ -36,7 +38,7 @@ class DigimonDetails {
     if (json != null) {
       return DigimonDetails(
         id: json[kId],
-        name: json[kName],
+        name: DigimonUtils.formattedName(json[kName]),
         xAntibody: json['xAntibody'],
         images: json['images'],
         types: json['types'],

@@ -27,9 +27,9 @@ class DigimonDetailsView extends StatefulWidget {
 }
 
 class _DigimonDetailsViewState extends State<DigimonDetailsView> {
-  List<SkillItem> _skills = [];
-  List<FieldItem> _fields = [];
-  List<EvolutionItem> _evolutions = [];
+  List<SkillItem>? _skills;
+  List<FieldItem>? _fields;
+  List<EvolutionItem>? _evolutions;
 
   @override
   Widget build(BuildContext context) {
@@ -93,10 +93,7 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                       padding: const EdgeInsets.only(top: 40, left: 20),
                       child: Align(
                         alignment: Alignment.topLeft,
-                        child: Icon(
-                          Icons.arrow_back,
-                          color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true)),
-                        ),
+                        child: SvgPicture.asset(kBackArrow, width: 30, color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true))),
                       ),
                     ),
                   ),
@@ -308,7 +305,7 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                                 FutureBuilder(
                                     future: _generateSkills(),
                                     builder: (context, AsyncSnapshot<List<SkillItem>?> snapshot) {
-                                      if (snapshot.hasData) {
+                                      if (snapshot.data != null && snapshot.data!.isNotEmpty) {
                                         return ScrollConfiguration(
                                           behavior: MyBehavior(),
                                           child: ListView.builder(
@@ -320,39 +317,56 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                                           ),
                                         );
                                       } else {
-                                        return const CircularProgressIndicator();
+                                        return Padding(
+                                          padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 3, top: 50),
+                                          child: const Text("No Skills available"),
+                                        );
                                       }
                                     }),
                                 //Evolution
                                 FutureBuilder(
                                     future: _generateEvolutions(),
                                     builder: (context, AsyncSnapshot<List<EvolutionItem>?> snapshot) {
-                                      return ScrollConfiguration(
-                                        behavior: MyBehavior(),
-                                        child: ListView.builder(
-                                          shrinkWrap: false,
-                                          itemCount: _evolutions.length,
-                                          itemBuilder: (BuildContext context, int index) {
-                                            return _evolutions[index];
-                                          },
-                                        ),
-                                      );
+                                      if (snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                        return ScrollConfiguration(
+                                          behavior: MyBehavior(),
+                                          child: ListView.builder(
+                                            shrinkWrap: false,
+                                            itemCount: _evolutions?.length,
+                                            itemBuilder: (BuildContext context, int index) {
+                                              return _evolutions![index];
+                                            },
+                                          ),
+                                        );
+                                      } else {
+                                        return Padding(
+                                          padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 3, top: 50),
+                                          child: const Text("No Evolutions available"),
+                                        );
+                                      }
                                     }),
                                 //Fields
                                 FutureBuilder(
                                     future: _generateFields(),
                                     builder: (context, AsyncSnapshot<List<FieldItem>?> snapshot) {
-                                      return ScrollConfiguration(
-                                        behavior: MyBehavior(),
-                                        child: ListView.builder(
-                                          shrinkWrap: false,
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          itemCount: _fields.length,
-                                          itemBuilder: (BuildContext context, int index) {
-                                            return _fields[index];
-                                          },
-                                        ),
-                                      );
+                                      if (snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                        return ScrollConfiguration(
+                                          behavior: MyBehavior(),
+                                          child: ListView.builder(
+                                            shrinkWrap: false,
+                                            physics: const NeverScrollableScrollPhysics(),
+                                            itemCount: _fields?.length,
+                                            itemBuilder: (BuildContext context, int index) {
+                                              return _fields![index];
+                                            },
+                                          ),
+                                        );
+                                      } else {
+                                        return Padding(
+                                          padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 3, top: 50),
+                                          child: const Text("No Fields available"),
+                                        );
+                                      }
                                     }),
                               ],
                             ),
@@ -370,8 +384,8 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
     );
   }
 
-  Future<List<SkillItem>> _generateSkills() async {
-    if (_skills.isEmpty) {
+  Future<List<SkillItem>?> _generateSkills() async {
+    if (_skills == null) {
       _skills = widget.details!.skills!
           .map((element) =>
               SkillItem(name: element['skill'], description: element['description'], themeColor: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true))))
@@ -381,8 +395,8 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
     return _skills;
   }
 
-  Future<List<FieldItem>> _generateFields() async {
-    if (_fields.isEmpty) {
+  Future<List<FieldItem>?> _generateFields() async {
+    if (_fields == null) {
       _fields = widget.details!.fields!
           .map(
             (element) => FieldItem(name: element['field'], themeColor: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true))),
@@ -393,8 +407,8 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
     return _fields;
   }
 
-  Future<List<EvolutionItem>> _generateEvolutions() async {
-    if (_evolutions.isEmpty) {
+  Future<List<EvolutionItem>?> _generateEvolutions() async {
+    if (_evolutions == null) {
       List<EvolutionItem> nextEvolutions = [];
       if (widget.details!.nextEvolutions!.isNotEmpty) {
         nextEvolutions = widget.details!.nextEvolutions!

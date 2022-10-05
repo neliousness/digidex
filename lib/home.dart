@@ -5,6 +5,7 @@ import 'package:digidexplus/viewmodels/digimon_viewmodel.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 import 'components/stacked_list.dart';
@@ -24,21 +25,18 @@ class _HomeState extends State<Home> {
   late RestClient client;
   late DigimonViewModel _digimonViewModel;
 
-  int page = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _controller = ScrollController();
 
   Color bgColor = Colors.blue;
   double scale = 2.86;
+  int page = 0;
+  String appVersion = "";
 
   @override
   void initState() {
     super.initState();
-
-    client = RestClient(dio);
-    _initListeners();
-    _initObservers();
-    _loadItems();
+    _init();
   }
 
   @override
@@ -73,9 +71,26 @@ class _HomeState extends State<Home> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0, bottom: 12),
-                        child: Text(
-                          kAppName,
-                          style: TextStyle(color: Colors.grey[800], fontSize: 26),
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.topCenter,
+                              child: Text(
+                                kAppName,
+                                style: TextStyle(color: Colors.grey[800], fontSize: 26),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 12.0, top: 8),
+                              child: Align(
+                                alignment: Alignment.topRight,
+                                child: Text(
+                                  "v$appVersion",
+                                  style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(
@@ -125,6 +140,16 @@ class _HomeState extends State<Home> {
 
   _loadItems() {
     _digimonViewModel.loadData(page);
+  }
+
+  _init() async {
+    client = RestClient(dio);
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    appVersion = packageInfo.version;
+
+    _initListeners();
+    _initObservers();
+    _loadItems();
   }
 
   _initListeners() {
