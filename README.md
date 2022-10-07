@@ -20,3 +20,6 @@ Though the API is not extensive i believe this is a project that can incorporate
 ## Notes
 You may notice that the list of digimon is made possible with a class called the StackedListView, its important to note that all credits go to <> for this listview, unfortunately i couldn't use the lib because it has a bug that affected the listing of items. 
 so i copied the code and fixed it myself. i'll be creating a pull request to fix the bug soon.
+
+## Download
+The app will also be available soon on the Google playstore
