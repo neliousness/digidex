@@ -1,4 +1,4 @@
-# Digidexplus
+# DigiDexPlus
 
 A Flutter based Digimon encyclopedia
 
