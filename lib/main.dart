@@ -1,4 +1,5 @@
 import 'package:digidexplus/utils/constants.dart';
+import 'package:digidexplus/viewmodels/digimon_single_viewmodel.dart';
 import 'package:digidexplus/viewmodels/digimon_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => DigimonViewModel()),
+        ChangeNotifierProvider(create: (_) => DigimonSingleViewModel()),
       ],
       child: const MyApp(),
     ),

@@ -10,7 +10,6 @@ import 'base_view_model.dart';
 
 class DigimonViewModel extends BaseViewModel {
   late RestClient client;
-  Map<String, PaletteGenerator> paletteMap = {};
 
   List<DigimonCard> _digimon = [];
 
@@ -24,6 +23,14 @@ class DigimonViewModel extends BaseViewModel {
 
   bool get loading => _loading;
 
+  late DigiData? _digiData = null;
+
+  DigiData? get digiData => _digiData;
+
+  set digiData(DigiData? value) {
+    _digiData = value;
+  }
+
   init(RestClient client) {
     this.client = client;
   }
@@ -32,25 +39,24 @@ class DigimonViewModel extends BaseViewModel {
     _loading = true;
     client.getPaginatedDigimon(page).then((values) {
       values.content?.forEach((element) {
-        print("content $element");
         Digimon item = Digimon.$DigimonFromJson(element);
-        client.getDigimon("${item.id}").then((details) => _getPaletteGenerator(details));
+        client.getDigimon("${item.id}").then((details) => _getListPaletteGenerator(details));
       });
     });
   }
 
-  _getPaletteGenerator(DigimonDetails details) async {
+  _getListPaletteGenerator(DigimonDetails details) async {
     final image = details.images?[0][kHref];
-    Future<PaletteGenerator?> gen = !paletteMap.containsKey(image) ? DigimonUtils.generatePalette(details) : _localGen(image);
+    Future<PaletteGenerator?> gen = !DigimonUtils.paletteMap.containsKey(image) ? DigimonUtils.generatePalette(details) : _localGen(image);
     gen.then((palette) => _listBuilder(DigiData(palette!, details)));
   }
 
   _listBuilder(DigiData data) async {
-    DigimonDetails details = data.details;
-    PaletteGenerator generator = data.generator;
+    DigimonDetails? details = data.details;
+    PaletteGenerator? generator = data.generator;
 
-    final image = details.images?[0][kHref];
-    paletteMap[image] = generator;
+    final image = details?.images?[0][kHref];
+    DigimonUtils.paletteMap[image] = generator!;
 
     _digimon.add(DigimonCard(
       client: client,
@@ -68,17 +74,18 @@ class DigimonViewModel extends BaseViewModel {
   }
 
   Future<PaletteGenerator?> _localGen(String href) async {
-    return paletteMap[href];
+    return DigimonUtils.paletteMap[href];
   }
 }
 
 class DigiData {
-  PaletteGenerator _generator;
-  DigimonDetails _details;
+  PaletteGenerator? _generator;
+  DigimonDetails? _details;
+  bool search = false;
 
-  DigiData(this._generator, this._details);
+  DigiData(this._generator, this._details, {this.search = false});
 
-  DigimonDetails get details => _details;
+  DigimonDetails? get details => _details;
 
-  PaletteGenerator get generator => _generator;
+  PaletteGenerator? get generator => _generator;
 }

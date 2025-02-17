@@ -5,6 +5,8 @@ import '../models/digimon_details.dart';
 import 'constants.dart';
 
 class DigimonUtils {
+  static Map<String, PaletteGenerator> paletteMap = {};
+
   static Future<PaletteGenerator?> generatePalette(DigimonDetails? details) async {
     String href = details?.images?[0][kHref];
     NetworkImage image = NetworkImage(href);

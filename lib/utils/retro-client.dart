@@ -17,12 +17,3 @@ abstract class RestClient {
   @GET("/digimon/{id}")
   Future<DigimonDetails> getDigimon(@Path("id") String id);
 }
-
-
-
-
-
-
-
-
-

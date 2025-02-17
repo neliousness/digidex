@@ -37,8 +37,9 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // Hero
             Container(
-              color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true).withOpacity(0.7)),
+              color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true).withOpacity(0.9)),
               height: MediaQuery.of(context).size.height / 2.8,
               width: MediaQuery.of(context).size.width,
               child: Stack(
@@ -54,29 +55,34 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(
-                            width: 215,
-                            height: 215,
-                            child: Hero(
-                              tag: widget.imageLink!,
-                              child: CachedNetworkImage(
-                                imageUrl: widget.imageLink!,
-                                progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
-                                errorWidget: (context, url, error) => const Icon(Icons.error),
+                          Flexible(
+                            flex: 3,
+                            child: SizedBox(
+                              width: 215,
+                              height: 215,
+                              child: Hero(
+                                tag: widget.imageLink!,
+                                child: CachedNetworkImage(
+                                  imageUrl: widget.imageLink!,
+                                  progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+                                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                                ),
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true)), width: 1),
-                                  borderRadius: BorderRadius.circular(16)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  widget.details!.types!.isNotEmpty ? "${widget.details?.types?[0]['type']}" : kNA,
-                                  style: TextStyle(color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true)), fontWeight: FontWeight.bold),
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 16, top: 5),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border.all(color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true)), width: 1),
+                                    borderRadius: BorderRadius.circular(16)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    widget.details!.types!.isNotEmpty ? "${widget.details?.types?[0]['type']}" : kNA,
+                                    style: TextStyle(color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true)), fontWeight: FontWeight.bold),
+                                  ),
                                 ),
                               ),
                             ),
@@ -104,15 +110,7 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
             Container(
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true).withOpacity(0.7)),
-                    ColorUtils.getColor(widget.paletteGenerator!, true).withOpacity(0.2),
-                  ],
-                  begin: const FractionalOffset(1.0, 0.0),
-                  end: const FractionalOffset(1.0, 1.0),
-                  stops: [0.1, 1.0],
-                ),
+                color: ColorUtils.darken(ColorUtils.getColor(widget.paletteGenerator!, true).withOpacity(0.9)),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -247,74 +245,63 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 40.0),
-                    child: DefaultTabController(
-                      length: 4,
-                      child: Column(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: TabBar(
-                              indicatorSize: TabBarIndicatorSize.label,
-                              labelPadding: EdgeInsets.only(right: 0),
-                              indicatorColor: Colors.white,
-                              tabs: [
-                                Tab(
-                                  text: "About",
-                                ),
-                                Tab(
-                                  text: "Skills",
-                                ),
-                                Tab(
-                                  text: "Evolution",
-                                ),
-                                Tab(
-                                  text: "Fields",
-                                )
-                              ],
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      //About
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
+                        child: Column(
+                          spacing: 10,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "About",
+                              style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
                             ),
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height / 1.8,
-                            child: TabBarView(
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: [
-                                //About
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: ScrollConfiguration(
-                                    behavior: MyBehavior(),
-                                    child: SingleChildScrollView(
-                                      child: Container(
-                                        width: MediaQuery.of(context).size.width,
-                                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(12.0),
-                                          child: Text(
-                                            DigimonUtils.getDescription(widget.details!.descriptions!, "en_us"),
-                                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[600]),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(0.0),
+                                child: Text(
+                                  DigimonUtils.getDescription(widget.details!.descriptions!, "en_us"),
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
-                                //Skills
-                                FutureBuilder(
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      //Abilities
+                      Padding(
+                        padding: const EdgeInsets.only(top: 0, bottom: 25, left: 0, right: 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 0, bottom: 0, left: 20, right: 20),
+                              child: Text(
+                                "Abilities",
+                                style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 0.0),
+                              child: SizedBox(
+                                height: MediaQuery.sizeOf(context).height * 0.16,
+                                child: FutureBuilder(
                                     future: _generateSkills(),
                                     builder: (context, AsyncSnapshot<List<SkillItem>?> snapshot) {
                                       if (snapshot.data != null && snapshot.data!.isNotEmpty) {
-                                        return ScrollConfiguration(
-                                          behavior: MyBehavior(),
-                                          child: ListView.builder(
-                                            shrinkWrap: false,
-                                            itemCount: snapshot.data!.length,
-                                            itemBuilder: (BuildContext context, int index) {
-                                              return snapshot.data![index];
-                                            },
-                                          ),
+                                        return ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          shrinkWrap: true,
+                                          padding: const EdgeInsets.only(left: 20),
+                                          itemCount: snapshot.data!.length,
+                                          itemBuilder: (BuildContext context, int index) {
+                                            return snapshot.data![index];
+                                          },
                                         );
                                       } else {
                                         return Padding(
@@ -323,57 +310,92 @@ class _DigimonDetailsViewState extends State<DigimonDetailsView> {
                                         );
                                       }
                                     }),
-                                //Evolution
-                                FutureBuilder(
-                                    future: _generateEvolutions(),
-                                    builder: (context, AsyncSnapshot<List<EvolutionItem>?> snapshot) {
-                                      if (snapshot.data != null && snapshot.data!.isNotEmpty) {
-                                        return ScrollConfiguration(
-                                          behavior: MyBehavior(),
-                                          child: ListView.builder(
-                                            shrinkWrap: false,
-                                            itemCount: _evolutions?.length,
-                                            itemBuilder: (BuildContext context, int index) {
-                                              return _evolutions![index];
-                                            },
-                                          ),
-                                        );
-                                      } else {
-                                        return Padding(
-                                          padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 3, top: 50),
-                                          child: const Text("No Evolutions available"),
-                                        );
-                                      }
-                                    }),
-                                //Fields
-                                FutureBuilder(
-                                    future: _generateFields(),
-                                    builder: (context, AsyncSnapshot<List<FieldItem>?> snapshot) {
-                                      if (snapshot.data != null && snapshot.data!.isNotEmpty) {
-                                        return ScrollConfiguration(
-                                          behavior: MyBehavior(),
-                                          child: ListView.builder(
-                                            shrinkWrap: false,
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            itemCount: _fields?.length,
-                                            itemBuilder: (BuildContext context, int index) {
-                                              return _fields![index];
-                                            },
-                                          ),
-                                        );
-                                      } else {
-                                        return Padding(
-                                          padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 3, top: 50),
-                                          child: const Text("No Fields available"),
-                                        );
-                                      }
-                                    }),
-                              ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                      //Evolutions
+                      Padding(
+                        padding: const EdgeInsets.only(top: 0, bottom: 25, left: 0, right: 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 25),
+                              child: Text(
+                                "Evolutions",
+                                style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            SizedBox(
+                              height: MediaQuery.sizeOf(context).height * 0.16,
+                              child: FutureBuilder(
+                                  future: _generateEvolutions(),
+                                  builder: (context, AsyncSnapshot<List<EvolutionItem>?> snapshot) {
+                                    if (snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                      return ScrollConfiguration(
+                                        behavior: MyBehavior(),
+                                        child: ListView.builder(
+                                          padding: const EdgeInsets.only(left: 20.0),
+                                          shrinkWrap: true,
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: _evolutions?.length,
+                                          itemBuilder: (BuildContext context, int index) {
+                                            return _evolutions![index];
+                                          },
+                                        ),
+                                      );
+                                    } else {
+                                      return Padding(
+                                        padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 3, top: 50),
+                                        child: const Text("No Evolutions available"),
+                                      );
+                                    }
+                                  }),
+                            ),
+                          ],
+                        ),
+                      ),
+                      //Fields
+                      Padding(
+                        padding: const EdgeInsets.only(top: 0, bottom: 25, left: 0, right: 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 25),
+                              child: Text(
+                                "Fields",
+                                style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            SizedBox(
+                              height: MediaQuery.sizeOf(context).height * 0.16,
+                              child: FutureBuilder(
+                                  future: _generateFields(),
+                                  builder: (context, AsyncSnapshot<List<FieldItem>?> snapshot) {
+                                    if (snapshot.data != null && snapshot.data!.isNotEmpty) {
+                                      return ListView.builder(
+                                        shrinkWrap: false,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemCount: _fields?.length,
+                                        itemBuilder: (BuildContext context, int index) {
+                                          return _fields![index];
+                                        },
+                                      );
+                                    } else {
+                                      return Padding(
+                                        padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 3, top: 50),
+                                        child: const Text("No Fields available"),
+                                      );
+                                    }
+                                  }),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

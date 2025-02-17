@@ -1,4 +1,4 @@
-package com.example.digidexplus
+package com.dicemz.digidexplus
 
 import io.flutter.embedding.android.FlutterActivity
 

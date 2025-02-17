@@ -14,18 +14,16 @@ class SkillItem extends StatefulWidget {
 }
 
 class _SkillItemState extends State<SkillItem> {
-  bool collapsed = true;
+
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          collapsed = !collapsed;
-        });
+
       },
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(right: 16.0, top: 16,bottom: 16),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 700),
           curve: Curves.easeInOut,
@@ -37,10 +35,19 @@ class _SkillItemState extends State<SkillItem> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        Flexible(
+                          child: Text(
+                            widget.name,
+                            softWrap: true,
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.only(left: 10.0),
                           child: SvgPicture.asset(
@@ -49,27 +56,10 @@ class _SkillItemState extends State<SkillItem> {
                             color: widget.themeColor,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Text(
-                            widget.name,
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        )
                       ],
                     ),
-                    Visibility(
-                        visible: !collapsed,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0, top: 15),
-                          child: Text(
-                            widget.description,
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                        ))
                   ],
                 ),
-                Align(alignment: Alignment.topRight, child: collapsed ? Icon(Icons.keyboard_arrow_down_rounded) : Icon(Icons.keyboard_arrow_up_rounded))
               ],
             ),
           ),

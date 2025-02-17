@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:digidexplus/utils/digimon_utils.dart';
 import 'package:digidexplus/utils/retro-client.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:palette_generator/palette_generator.dart';
@@ -55,45 +54,44 @@ class _EvolutionItemState extends State<EvolutionItem> {
       child: Padding(
         padding: const EdgeInsets.only(left: 0.0, right: 10.0),
         child: SizedBox(
-          width: MediaQuery.of(context).size.width,
           height: 100,
           child: Stack(
             children: [
-              Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.all(17.0),
-                  child: Container(
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(17.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: RotatedBox(
-                              quarterTurns: widget.isNextEvolution ? 1 : -1,
-                              child: SvgPicture.asset(
-                                "assets/images/svgs/up_arrow.svg",
-                                width: 35,
-                                color: widget.themeColor,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Text(
-                              DigimonUtils.formattedName(widget.name),
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Align(
+              //   alignment: Alignment.center,
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(17.0),
+              //     child: Container(
+              //       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+              //       child: Padding(
+              //         padding: const EdgeInsets.all(17.0),
+              //         child: Row(
+              //           mainAxisAlignment: MainAxisAlignment.start,
+              //           children: [
+              //             Padding(
+              //               padding: const EdgeInsets.only(left: 10.0),
+              //               child: RotatedBox(
+              //                 quarterTurns: widget.isNextEvolution ? 1 : -1,
+              //                 child: SvgPicture.asset(
+              //                   "assets/images/svgs/up_arrow.svg",
+              //                   width: 35,
+              //                   color: widget.themeColor,
+              //                 ),
+              //               ),
+              //             ),
+              //             Padding(
+              //               padding: const EdgeInsets.only(left: 10.0),
+              //               child: Text(
+              //                 DigimonUtils.formattedName(widget.name),
+              //                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              //               ),
+              //             )
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               Align(
                   alignment: Alignment.centerRight,
                   child: Container(
