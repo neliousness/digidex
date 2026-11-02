@@ -1,4 +1,4 @@
-# Digidexplus
+# DigiDexPlus
 
 A Flutter based Digimon encyclopedia
 
@@ -46,8 +46,5 @@ The app shows AdMob banners and an occasional interstitial, after Google's conse
 - `android/app/src/main/AndroidManifest.xml` (`com.google.android.gms.ads.APPLICATION_ID`)
 - `ios/Runner/Info.plist` (`GADApplicationIdentifier`, still a test id: there is no iOS app in AdMob yet)
 
-## Notes
-The list of digimon is made possible with a class called the StackedListView. All credits go to [gzlock](https://github.com/gzlock/flutter_stacked_listview) for this list view ([stacked_listview](https://pub.dev/packages/stacked_listview) on pub.dev). I couldn't use the package because it has a bug that affected the listing of items, so I copied the code into `lib/components/stacked_list.dart` and fixed it myself.
-
 ## Download
-The app will also be available soon on the Google playstore
+[DigiDexPlus on Google Play](https://play.google.com/store/apps/details?id=com.dicemz.digidexplus)
