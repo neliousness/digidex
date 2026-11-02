@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>DigiDex store screenshot</title>
+<!--
+  Play Store screenshot: a caption over a phone mock-up holding a capture
+  from raw/. Render one slide per hash at 1080x1920, e.g. template.html#3:
+  chrome --headless=new --window-size=1080,1920 --hide-scrollbars
+         --force-device-scale-factor=1 --screenshot=out.png "file:///.../template.html#3"
+-->
+<style>
+  @font-face { font-family: 'Bricolage'; src: url('../../fonts/BricolageGrotesque-Variable.ttf'); font-weight: 200 800; }
+  @font-face { font-family: 'DM Sans'; src: url('../../fonts/DMSans-Variable.ttf'); font-weight: 100 1000; }
+
+  :root { --ink: #0B0B14; --bg: #FFE14D; --bar: #FFE14D; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+  body {
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle, rgba(11, 11, 20, 0.16) 3.2px, transparent 3.8px);
+    background-size: 20px 20px;
+    background-position: 10px 10px;
+  }
+
+  /* Caption */
+  .caption { position: absolute; top: 74px; left: 0; right: 0; text-align: center; }
+  .title {
+    display: inline-block;
+    font-family: 'Bricolage', sans-serif; font-weight: 800; font-size: 104px; line-height: 0.95;
+    text-transform: uppercase; letter-spacing: -1px; color: #fff;
+    -webkit-text-stroke: 12px var(--ink); paint-order: stroke fill;
+    text-shadow: 8px 8px 0 var(--ink);
+    transform: skewX(-12deg);
+  }
+  .sub {
+    display: inline-block; margin-top: 34px;
+    background: var(--ink); color: #FFE14D; border-radius: 12px;
+    padding: 12px 26px 14px;
+    font-weight: 800; font-size: 38px; letter-spacing: 0.5px;
+    transform: rotate(-1.5deg);
+  }
+
+  /* Phone: flat titanium sides, squared-off corners, centred punch-hole camera. */
+  .phone {
+    position: absolute; left: 50%; top: 436px; transform: translateX(-50%);
+    width: 716px; height: 1440px; border-radius: 58px;
+    background: linear-gradient(90deg, #5d5e66 0%, #2a2b31 3%, #3b3c43 50%, #2a2b31 97%, #5d5e66 100%);
+    padding: 6px;
+    box-shadow: 18px 22px 0 var(--ink), 0 30px 60px rgba(0, 0, 0, 0.25);
+  }
+  .btn { position: absolute; right: -9px; width: 6px; border-radius: 0 4px 4px 0; background: #3b3c43; }
+  .btn.vol { top: 300px; height: 150px; }
+  .btn.pwr { top: 500px; height: 92px; }
+  .bezel { width: 100%; height: 100%; border-radius: 52px; background: #050507; padding: 12px; }
+  .screen {
+    position: relative; width: 680px; height: 1404px; border-radius: 40px; overflow: hidden;
+    background: var(--fill, #fff);
+  }
+  .status {
+    position: absolute; top: 0; left: 0; right: 0; height: 48px; z-index: 2;
+    background: var(--bar);
+    display: flex; align-items: center; justify-content: space-between; padding: 4px 34px 0 40px;
+    font-weight: 700; font-size: 24px; color: var(--ink);
+  }
+  .status svg { display: block; }
+  .icons { display: flex; gap: 8px; align-items: center; }
+  .camera {
+    position: absolute; top: 14px; left: 50%; width: 24px; height: 24px; margin-left: -12px; z-index: 3;
+    border-radius: 50%; background: #050507; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+  }
+  .shot { position: absolute; left: 0; top: 48px; width: 680px; height: 1356px; overflow: hidden; }
+  .shot img { position: absolute; left: 0; width: 680px; }
+</style>
+</head>
+<body>
+  <div class="caption">
+    <div class="title" id="title"></div><br>
+    <div class="sub" id="sub"></div>
+  </div>
+
+  <div class="phone">
+    <div class="btn vol"></div><div class="btn pwr"></div>
+    <div class="bezel">
+      <div class="screen">
+        <div class="status">
+          <span>9:41</span>
+          <span class="icons">
+            <svg width="26" height="20" viewBox="0 0 26 20"><rect x="0" y="14" width="4" height="6" rx="1" fill="currentColor"/><rect x="7" y="10" width="4" height="10" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="15" rx="1" fill="currentColor"/><rect x="21" y="0" width="4" height="20" rx="1" fill="currentColor"/></svg>
+            <svg width="26" height="20" viewBox="0 0 26 20"><path d="M13 19 L1 6 A17 17 0 0 1 25 6 Z" fill="currentColor"/></svg>
+            <svg width="40" height="20" viewBox="0 0 40 20"><rect x="1" y="2" width="33" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><rect x="4" y="5" width="27" height="10" rx="2" fill="currentColor"/><rect x="36" y="7" width="3" height="6" rx="1" fill="currentColor"/></svg>
+          </span>
+        </div>
+        <div class="camera"></div>
+        <div class="shot"><img id="img" alt=""></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // raw captures are 720x1480: crop 8px each side (edge-panel handle), drop
+  // the status bar (top) and gesture bar (from y 1452).
+  const slides = {
+    1: { img: '01-home', top: 48, bg: '#FFE14D', bar: '#FFE14D', title: 'Spin to<br>discover!', sub: 'Draw a random Digimon partner from the dial' },
+    2: { img: '02-detail', top: 48, bg: '#FF8A1F', bar: '#FFB979', title: 'Meet every<br>Digimon', sub: 'Art, type and story for all 1,488' },
+    3: { img: '03b-detail-agumon-lower', top: 78, bg: '#00B7FF', bar: '#FFFFFF', title: 'Fields, skills<br>& more', sub: 'Everything about your partner on one page' },
+    4: { img: '04-evolutions', top: 48, bg: '#7CF05A', bar: '#FFB979', title: 'Explore<br>evolutions', sub: 'See what each Digimon can become' },
+    5: { img: '05-browse', top: 48, bg: '#FF3D7F', bar: '#FFE14D', title: 'Browse the<br>whole Dex', sub: 'Every Digimon, comic-panel style' },
+    6: { img: '06-search-grey', top: 48, bg: '#A66BFF', bar: '#FFE14D', title: 'Find any<br>Digimon', sub: 'Search by name, filter by level' },
+    7: { img: '07-favorites', top: 48, bg: '#00E0C6', bar: '#FF6FB5', title: 'Save your<br>favorites', sub: 'Keep your team one tap away' },
+  };
+  const s = slides[location.hash.slice(1)] || slides[1];
+  const scale = 680 / 704;
+  document.documentElement.style.setProperty('--bg', s.bg);
+  document.documentElement.style.setProperty('--bar', s.bar);
+  document.querySelector('.screen').style.setProperty('--fill', s.bar);
+  document.getElementById('title').innerHTML = s.title;
+  document.getElementById('sub').textContent = s.sub;
+  const img = document.getElementById('img');
+  img.style.width = (720 * scale) + 'px';
+  img.style.left = (-8 * scale) + 'px';
+  img.style.top = (-s.top * scale) + 'px';
+  // Only show the capture down to the gesture bar.
+  document.querySelector('.shot').style.height = ((1452 - s.top) * scale) + 'px';
+  img.src = 'raw/' + s.img + '.png';
+</script>
+</body>
+</html>

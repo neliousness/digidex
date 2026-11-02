@@ -1,6 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
-
-@JsonSerializable()
 class Content {
   List<dynamic>? content;
   dynamic pageable;
@@ -9,7 +6,25 @@ class Content {
 
   factory Content.fromJson(Map<String, dynamic> json) => _$ContentFromJson(json);
 
-  static _$ContentFromJson(Map<String, dynamic> json) {
+  static Content _$ContentFromJson(Map<String, dynamic> json) {
     return Content(content: json['content'], pageable: json['pageable']);
+  }
+
+  /// How many Digimon match in total (all pages), if the API says.
+  int? get totalElements {
+    if (pageable is Map) {
+      final total = pageable['totalElements'];
+      if (total is int) return total;
+    }
+    return null;
+  }
+
+  /// False once the API reports there is no next page.
+  bool get hasNextPage {
+    if (pageable is Map) {
+      final next = pageable['nextPage'];
+      return next != null && '$next'.isNotEmpty;
+    }
+    return content?.isNotEmpty ?? false;
   }
 }
