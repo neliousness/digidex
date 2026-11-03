@@ -48,3 +48,6 @@ app.*.map.json
 
 # Release bundles built locally (uploaded to Play, not versioned)
 /dist/
+
+# Firebase config (download from the Firebase console, project digidexplus)
+/android/app/google-services.json

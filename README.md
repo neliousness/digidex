@@ -46,5 +46,8 @@ The app shows AdMob banners and an occasional interstitial, after Google's conse
 - `android/app/src/main/AndroidManifest.xml` (`com.google.android.gms.ads.APPLICATION_ID`)
 - `ios/Runner/Info.plist` (`GADApplicationIdentifier`, still a test id: there is no iOS app in AdMob yet)
 
+## Analytics and crash reports
+Release builds send usage events and crash reports to the Firebase project `digidexplus` (Google Analytics for Firebase and Crashlytics); debug builds send nothing. The events (draws, Digimon opened, searches, level filters, favourites, evolutions) are in `lib/analytics/app_analytics.dart`. Building needs `android/app/google-services.json`, which is not in the repo: download it from the Firebase console (Project settings → Your apps → DigiDexPlus Android). Without it the Android build fails.
+
 ## Download
 [DigiDexPlus on Google Play](https://play.google.com/store/apps/details?id=com.dicemz.digidexplus)

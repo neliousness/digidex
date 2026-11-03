@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../ads/banner_ad_slot.dart';
+import '../analytics/app_analytics.dart';
 import '../art/sticker_art.dart';
 import '../data/favorites.dart';
 import '../sound/card_sounds.dart';
@@ -102,8 +103,12 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin, Widg
       return;
     }
     if (card == null || (model.draws == _playedDraws && card.id == _playedCard)) return;
-    // Every draw after the opening deal lands with a sound.
-    if (_playedCard != null) context.read<CardSounds>().draw();
+    // Every draw after the opening deal lands with a sound. A tap counts a
+    // new draw; otherwise the dial brought the card into the slot.
+    if (_playedCard != null && card.id != null) {
+      context.read<CardSounds>().draw();
+      context.read<AppAnalytics>().cardDrawn(card.id!, fromDial: model.draws == _playedDraws);
+    }
     _playedDraws = model.draws;
     _playedCard = card.id;
     if (_motion) {

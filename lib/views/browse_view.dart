@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../ads/banner_ad_slot.dart';
+import '../analytics/app_analytics.dart';
 import '../theme/comic.dart';
 import '../theme/comic_widgets.dart';
 import '../viewmodels/browse_viewmodel.dart';
@@ -26,6 +29,7 @@ class _BrowseViewState extends State<BrowseView> {
   late final TextEditingController _search = TextEditingController(text: _model.query);
   final FocusNode _searchFocus = FocusNode();
   final ScrollController _scroll = ScrollController();
+  Timer? _searchLog;
 
   @override
   void initState() {
@@ -39,6 +43,7 @@ class _BrowseViewState extends State<BrowseView> {
 
   @override
   void dispose() {
+    _searchLog?.cancel();
     if (_searchFocus.hasFocus) hideKeyboard();
     _scroll.dispose();
     _search.dispose();
@@ -55,11 +60,20 @@ class _BrowseViewState extends State<BrowseView> {
     _toTop();
     _model.setQuery(text);
     setState(() {}); // the clear button
+    // Count the search once the user stops typing, not every keystroke.
+    _searchLog?.cancel();
+    final query = text.trim();
+    if (query.isNotEmpty) {
+      _searchLog = Timer(const Duration(milliseconds: 1500), () {
+        if (mounted) context.read<AppAnalytics>().searched(query, _model.results.length);
+      });
+    }
   }
 
   void _setLevel(String? level) {
     _toTop();
     _model.setLevel(level);
+    context.read<AppAnalytics>().levelFiltered(level);
   }
 
   @override
@@ -69,8 +83,8 @@ class _BrowseViewState extends State<BrowseView> {
     final countLabel = count == null || model.loading
         ? '…'
         : model.filtered
-            ? '${formatCount(count)} ${count == 1 ? 'MATCH' : 'MATCHES'}'
-            : formatCount(count);
+        ? '${formatCount(count)} ${count == 1 ? 'MATCH' : 'MATCHES'}'
+        : formatCount(count);
     final digimon = model.results;
 
     Widget body;
@@ -106,30 +120,32 @@ class _BrowseViewState extends State<BrowseView> {
 
   Widget _header(String countLabel, String? level) {
     Widget chip(String label, bool on, VoidCallback onTap) => Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: Semantics(
-            button: true,
-            selected: on,
-            child: GestureDetector(
-              onTap: onTap,
-              child: Container(
-                height: 36,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: on ? Comic.ink : Comic.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Comic.ink, width: 3),
-                  boxShadow: on ? null : const [BoxShadow(color: Comic.ink, offset: Offset(2, 2))],
-                ),
-                child: Text(label.toUpperCase(), style: Comic.sansStyle(13, weight: 800, color: on ? Comic.yellow : Comic.ink, letterSpacing: 0.6)),
-              ),
+      padding: const EdgeInsets.only(right: 8),
+      child: Semantics(
+        button: true,
+        selected: on,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: on ? Comic.ink : Comic.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Comic.ink, width: 3),
+              boxShadow: on ? null : const [BoxShadow(color: Comic.ink, offset: Offset(2, 2))],
             ),
+            child: Text(label.toUpperCase(), style: Comic.sansStyle(13, weight: 800, color: on ? Comic.yellow : Comic.ink, letterSpacing: 0.6)),
           ),
-        );
+        ),
+      ),
+    );
 
     return DecoratedBox(
-      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Comic.ink, width: 5))),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Comic.ink, width: 5)),
+      ),
       child: Halftone(
         color: Comic.yellow,
         child: Padding(
@@ -145,7 +161,9 @@ class _BrowseViewState extends State<BrowseView> {
                     ComicRoundButton(icon: Icons.arrow_back_rounded, label: 'Back to home', onPressed: () => Navigator.of(context).maybePop()),
                     const SizedBox(width: 12),
                     // The design is 390 wide; on narrower phones the title gives way.
-                    const Expanded(child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: OutlinedText('Browse all', size: 32, height: 1))),
+                    const Expanded(
+                      child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: OutlinedText('Browse all', size: 32, height: 1)),
+                    ),
                     const SizedBox(width: 8),
                     ComicTag(countLabel, rotation: 3),
                   ],
@@ -200,10 +218,7 @@ class _BrowseViewState extends State<BrowseView> {
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.only(right: 20, bottom: 4, top: 2),
-                  children: [
-                    chip('All', level == null, () => _setLevel(null)),
-                    for (final l in _levels) chip(l, level == l, () => _setLevel(l)),
-                  ],
+                  children: [chip('All', level == null, () => _setLevel(null)), for (final l in _levels) chip(l, level == l, () => _setLevel(l))],
                 ),
               ),
             ],
@@ -225,7 +240,9 @@ class _BrowseViewState extends State<BrowseView> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Slant(child: Text('NO DIGIMON FOUND!', textAlign: TextAlign.center, style: Comic.displayStyle(28))),
+              Slant(
+                child: Text('NO DIGIMON FOUND!', textAlign: TextAlign.center, style: Comic.displayStyle(28)),
+              ),
               const SizedBox(height: 6),
               Text('Try fewer letters, or another level.', textAlign: TextAlign.center, style: Comic.sansStyle(15)),
             ],
@@ -242,7 +259,11 @@ class _BrowseViewState extends State<BrowseView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Couldn't reach the Digimon database.", textAlign: TextAlign.center, style: Comic.sansStyle(16, weight: 700, color: Comic.white)),
+            Text(
+              "Couldn't reach the Digimon database.",
+              textAlign: TextAlign.center,
+              style: Comic.sansStyle(16, weight: 700, color: Comic.white),
+            ),
             const SizedBox(height: 16),
             ComicButton('Try again', color: Comic.yellow, onPressed: _model.retry),
           ],

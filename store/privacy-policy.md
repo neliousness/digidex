@@ -4,7 +4,7 @@ title: DigiDexPlus Privacy Policy
 
 # DigiDexPlus Privacy Policy
 
-*Last updated: 2 November 2026*
+*Last updated: 2 November 2026 (added usage analytics and crash reports)*
 
 DigiDexPlus ("the app") is a free Digimon encyclopedia published on Google Play by DICEMZ. This policy explains what data the app handles and why.
 
@@ -13,6 +13,7 @@ DigiDexPlus ("the app") is a free Digimon encyclopedia published on Google Play 
 - The app has no accounts and never asks for your name, email address, contacts, photos or files.
 - We (DICEMZ) do not run our own servers for the app and do not collect or store personal data about you.
 - The app shows ads from **Google AdMob**. Google's ads software in the app collects some device and usage data to show ads, measure them and prevent fraud, as described below.
+- The app uses **Google Analytics for Firebase** to count how the app is used, and **Firebase Crashlytics** to report crashes, so we can see which features people use and fix problems.
 
 ## Digimon data
 
@@ -36,6 +37,17 @@ Google uses this data to serve and measure ads, for analytics, and to prevent fr
 If you are in the European Economic Area, the UK or Switzerland, the app asks for your consent through Google's consent form before personalised ads are shown.
 
 **Your choices:** you can reset or delete your advertising ID, or opt out of personalised ads, in your device's settings (Settings > Google > Ads, or Settings > Privacy > Ads, depending on your device).
+
+## Usage analytics and crash reports (Firebase)
+
+The app uses Google Analytics for Firebase and Firebase Crashlytics, both provided by Google. They collect:
+
+- **App interactions:** which screens you open and what you do in the app, such as drawing a card, opening a Digimon, saving a favourite, searching or filtering by level. Searches record the text you searched for (a Digimon name) and how many results it found.
+- **Device or other identifiers:** an app instance ID created by Firebase, and your device's advertising ID where available.
+- **Approximate location**, derived from your IP address (country or region, not your precise location).
+- **Crash logs and diagnostics:** when the app crashes, a report with the error, the state of the app and your device model and Android version.
+
+We use this only to understand how many people use the app and which features they use, and to fix crashes. It is not used to identify you, and we do not sell it. Google processes it under the [Firebase privacy information](https://firebase.google.com/support/privacy) and [Google's Privacy Policy](https://policies.google.com/privacy). Google Analytics keeps this data for 2 months; crash reports are kept for 90 days.
 
 ## Data security
 

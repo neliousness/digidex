@@ -1,3 +1,4 @@
+import 'package:digidexplus/analytics/app_analytics.dart';
 import 'package:digidexplus/main.dart';
 import 'package:digidexplus/models/digimon_details.dart';
 import 'package:digidexplus/sound/card_sounds.dart';
@@ -27,6 +28,28 @@ class RecordingSounds implements CardSounds {
   void draw() => draws++;
 }
 
+class RecordingAnalytics extends NoAnalytics {
+  final List<String> events = [];
+
+  @override
+  void cardDrawn(int digimonId, {required bool fromDial}) => events.add('draw:${fromDial ? 'dial' : 'tap'}');
+
+  @override
+  void digimonOpened(int digimonId, String? name) => events.add('open:$name');
+
+  @override
+  void evolutionsOpened(int digimonId) => events.add('evolutions:$digimonId');
+
+  @override
+  void searched(String query, int results) => events.add('search:$query:$results');
+
+  @override
+  void levelFiltered(String? level) => events.add('level:$level');
+
+  @override
+  void favoriteToggled(int digimonId, {required bool added}) => events.add('favorite:$digimonId:$added');
+}
+
 Future<void> settle(WidgetTester tester) async {
   // Some motion keeps running (spinners while loading), so pump a few frames
   // rather than waiting to settle.
@@ -45,7 +68,13 @@ Future<void> loadFonts() async {
 
 const List<String> defaultNames = ['Agumon', 'Greymon', 'MetalGreymon', 'Gabumon', 'Garurumon', 'Patamon', 'Tailmon', 'Greymon (Blue)'];
 
-Future<FakeDigimonRepository> pumpApp(WidgetTester tester, {List<String> names = defaultNames, CardSounds sounds = const SilentCardSounds(), Map<String, Object> prefs = const {}}) async {
+Future<FakeDigimonRepository> pumpApp(
+  WidgetTester tester, {
+  List<String> names = defaultNames,
+  CardSounds sounds = const SilentCardSounds(),
+  AppAnalytics analytics = const NoAnalytics(),
+  Map<String, Object> prefs = const {},
+}) async {
   SharedPreferences.setMockInitialValues(prefs);
   // The app turns its decorative motion off when the system asks; tests use that path.
   tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
@@ -63,19 +92,38 @@ Future<FakeDigimonRepository> pumpApp(WidgetTester tester, {List<String> names =
         id: 1,
         name: 'Agumon',
         releaseDate: '1997',
-        images: [{'href': 'https://example.com/1.png'}],
-        levels: [{'id': 4, 'level': 'Child'}],
-        attributes: [{'id': 4, 'attribute': 'Vaccine'}],
-        types: [{'id': 1, 'type': 'Reptile'}],
-        descriptions: [{'language': 'en_us', 'description': 'A reptile Digimon.'}, {'language': 'jap', 'description': '恐竜型デジモン。'}],
-        skills: [for (var i = 1; i <= 5; i++) {'skill': 'Skill $i', 'description': 'Does thing $i.'}],
-        fields: [{'field': 'Metal Empire'}],
-        nextEvolutions: [{'id': 2, 'digimon': 'Greymon', 'condition': 'With or without Gabumon', 'image': 'https://example.com/2.png'}],
-        priorEvolutions: [{'id': 9, 'digimon': 'Koromon', 'condition': '', 'image': 'https://example.com/9.png'}],
+        images: [
+          {'href': 'https://example.com/1.png'},
+        ],
+        levels: [
+          {'id': 4, 'level': 'Child'},
+        ],
+        attributes: [
+          {'id': 4, 'attribute': 'Vaccine'},
+        ],
+        types: [
+          {'id': 1, 'type': 'Reptile'},
+        ],
+        descriptions: [
+          {'language': 'en_us', 'description': 'A reptile Digimon.'},
+          {'language': 'jap', 'description': '恐竜型デジモン。'},
+        ],
+        skills: [
+          for (var i = 1; i <= 5; i++) {'skill': 'Skill $i', 'description': 'Does thing $i.'},
+        ],
+        fields: [
+          {'field': 'Metal Empire'},
+        ],
+        nextEvolutions: [
+          {'id': 2, 'digimon': 'Greymon', 'condition': 'With or without Gabumon', 'image': 'https://example.com/2.png'},
+        ],
+        priorEvolutions: [
+          {'id': 9, 'digimon': 'Koromon', 'condition': '', 'image': 'https://example.com/9.png'},
+        ],
       ),
     },
   )..levels.addAll({1: 'Child', 4: 'Child', 2: 'Adult', 8: 'Adult', 3: 'Perfect'});
-  await tester.pumpWidget(DigiDexApp(repository: repo, artService: FakeArtService(), sounds: sounds));
+  await tester.pumpWidget(DigiDexApp(repository: repo, artService: FakeArtService(), sounds: sounds, analytics: analytics));
   await settle(tester);
   return repo;
 }
@@ -269,7 +317,13 @@ void main() {
 
   group('favorites', () {
     testWidgets('empty at first; a hearted Digimon shows up, newest first', (tester) async {
-      await pumpApp(tester, names: ['Agumon'], prefs: {'favorite_ids': ['5']});
+      await pumpApp(
+        tester,
+        names: ['Agumon'],
+        prefs: {
+          'favorite_ids': ['5'],
+        },
+      );
       await tester.tap(find.bySemanticsLabel(RegExp(r'^Favorites')));
       await settle(tester);
       expect(find.text('1 SAVED'), findsOneWidget);
@@ -328,5 +382,43 @@ void main() {
     await tester.tap(find.text('FROM · 1'));
     await tester.pump();
     expect(find.text('KOROMON'), findsOneWidget);
+  });
+
+  testWidgets('analytics: dial and tap draws, and settled searches', (tester) async {
+    final analytics = RecordingAnalytics();
+    await pumpApp(tester, names: List.generate(40, (i) => 'Mon $i'), analytics: analytics);
+    expect(analytics.events, isEmpty, reason: 'the opening deal is not a draw');
+
+    await tester.drag(find.bySemanticsLabel(RegExp(r'^Your hand')), const Offset(-140, 0));
+    await settle(tester);
+    expect(analytics.events, ['draw:dial']);
+
+    final model = Provider.of<HomeViewModel>(tester.element(find.byType(HomeView)), listen: false);
+    final next = model.cardAt(model.drawnIndex + 1)!;
+    await tester.tap(find.bySemanticsLabel('Play ${next.name}'));
+    await settle(tester);
+    expect(analytics.events.last, 'draw:tap');
+
+    analytics.events.clear();
+    await tester.tap(find.bySemanticsLabel('Search and browse all'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'mon 1');
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.enterText(find.byType(TextField), 'mon 12');
+    await tester.pump(const Duration(seconds: 2));
+    expect(analytics.events, ['search:mon 12:1'], reason: 'only the search the user settled on');
+  });
+
+  testWidgets('analytics: opening a Digimon, saving it and its evolutions', (tester) async {
+    final analytics = RecordingAnalytics();
+    await pumpApp(tester, names: ['Agumon'], analytics: analytics);
+    await tester.tap(find.bySemanticsLabel('Open Agumon'));
+    await settle(tester);
+    await tester.tap(find.bySemanticsLabel('Save Agumon'));
+    await tester.pump();
+    await tester.scrollUntilVisible(find.text('SEE ALL 2 EVOLUTIONS ›'), 300);
+    await tester.tap(find.text('SEE ALL 2 EVOLUTIONS ›'));
+    await settle(tester);
+    expect(analytics.events, ['open:Agumon', 'favorite:1:true', 'evolutions:1']);
   });
 }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../ads/ad_service.dart';
 import '../ads/banner_ad_slot.dart';
+import '../analytics/app_analytics.dart';
 import '../art/art_service.dart';
 import '../art/sticker_art.dart';
 import '../data/digimon_repository.dart';
@@ -48,6 +49,7 @@ class _DetailViewState extends State<DetailView> with TickerProviderStateMixin {
       ..addListener(_changed)
       ..load();
     context.read<AdService>().onDetailsOpened();
+    if (widget.digimon.id != null) context.read<AppAnalytics>().digimonOpened(widget.digimon.id!, widget.digimon.name);
     final cached = widget.digimon.image == null ? null : context.read<ArtService>().cached(widget.digimon.image!);
     if (cached != null) _color = cached.colorFor(widget.digimon.id!);
   }
@@ -96,16 +98,11 @@ class _DetailViewState extends State<DetailView> with TickerProviderStateMixin {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Hero(
-              digimon: widget.digimon,
-              color: _themeColor,
-              scale: s,
-              intro: _intro,
-              spin: _spin,
-              onArt: _onArt,
-            ),
+            _Hero(digimon: widget.digimon, color: _themeColor, scale: s, intro: _intro, spin: _spin, onArt: _onArt),
             Container(
-              decoration: const BoxDecoration(border: Border(top: BorderSide(color: Comic.ink, width: 5))),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: Comic.ink, width: 5)),
+              ),
               padding: EdgeInsets.fromLTRB(20, 0, 20, 36 + bottom),
               child: details == null ? _loadingBody() : _body(details),
             ),
@@ -122,8 +119,13 @@ class _DetailViewState extends State<DetailView> with TickerProviderStateMixin {
         Transform.translate(
           offset: const Offset(0, -34),
           child: LayoutBuilder(
-            builder: (context, c) => OutlinedText(breakableName(widget.digimon.name ?? ''),
-                size: fitLongestWord(widget.digimon.name ?? '', maxSize: 60, width: c.maxWidth), stroke: 2, shadow: 4, height: 0.9),
+            builder: (context, c) => OutlinedText(
+              breakableName(widget.digimon.name ?? ''),
+              size: fitLongestWord(widget.digimon.name ?? '', maxSize: 60, width: c.maxWidth),
+              stroke: 2,
+              shadow: 4,
+              height: 0.9,
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -132,7 +134,12 @@ class _DetailViewState extends State<DetailView> with TickerProviderStateMixin {
           const SizedBox(height: 16),
           ComicButton('Try again', onPressed: _model.load, color: Comic.yellow),
         ] else
-          const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: Comic.ink, strokeWidth: 4))),
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(color: Comic.ink, strokeWidth: 4),
+            ),
+          ),
       ],
     );
   }
@@ -156,17 +163,36 @@ class _DetailViewState extends State<DetailView> with TickerProviderStateMixin {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               LayoutBuilder(
-                builder: (context, c) => OutlinedText(breakableName(d.name ?? ''),
-                    size: fitLongestWord(d.name ?? '', maxSize: 60, width: c.maxWidth), stroke: 2, shadow: 4, height: 0.9),
+                builder: (context, c) => OutlinedText(
+                  breakableName(d.name ?? ''),
+                  size: fitLongestWord(d.name ?? '', maxSize: 60, width: c.maxWidth),
+                  stroke: 2,
+                  shadow: 4,
+                  height: 0.9,
+                ),
               ),
               const SizedBox(height: 12),
               // Tags the API has no value for are left out.
-              Wrap(spacing: 8, runSpacing: 8, children: [
-                if (d.primaryLevel != kNA) ComicTag(d.primaryLevel, color: Comic.white, rotation: -2, fontSize: 13, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
-                if (d.primaryAttribute != kNA) ComicTag(d.primaryAttribute, background: Comic.attributeColor(d.primaryAttribute), color: Comic.ink, rotation: 2, bordered: true, fontSize: 13),
-                if (d.primaryType != kNA) ComicTag(d.primaryType, background: Comic.white, color: Comic.ink, rotation: -1, bordered: true, fontSize: 13),
-                if (d.releaseDate != null) ComicTag('Debut ${d.releaseDate}', background: Comic.yellow, color: Comic.ink, rotation: 1, bordered: true, fontSize: 13),
-              ]),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (d.primaryLevel != kNA)
+                    ComicTag(d.primaryLevel, color: Comic.white, rotation: -2, fontSize: 13, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
+                  if (d.primaryAttribute != kNA)
+                    ComicTag(
+                      d.primaryAttribute,
+                      background: Comic.attributeColor(d.primaryAttribute),
+                      color: Comic.ink,
+                      rotation: 2,
+                      bordered: true,
+                      fontSize: 13,
+                    ),
+                  if (d.primaryType != kNA) ComicTag(d.primaryType, background: Comic.white, color: Comic.ink, rotation: -1, bordered: true, fontSize: 13),
+                  if (d.releaseDate != null)
+                    ComicTag('Debut ${d.releaseDate}', background: Comic.yellow, color: Comic.ink, rotation: 1, bordered: true, fontSize: 13),
+                ],
+              ),
             ],
           ),
         ),
@@ -191,13 +217,13 @@ class _DetailViewState extends State<DetailView> with TickerProviderStateMixin {
             prior: from.isEmpty ? null : from.first,
             next: into.take(2).toList(),
             total: into.length + from.length,
-            onSeeAll: () => openEvolutions(context, d, into: into.isNotEmpty),
+            onSeeAll: () {
+              if (d.id != null) context.read<AppAnalytics>().evolutionsOpened(d.id!);
+              openEvolutions(context, d, into: into.isNotEmpty);
+            },
           ),
         ],
-        if (skills.isNotEmpty) ...[
-          gap,
-          _Skills(skills: skills, showAll: _allSkills, color: _themeColor, onShowAll: () => setState(() => _allSkills = true)),
-        ],
+        if (skills.isNotEmpty) ...[gap, _Skills(skills: skills, showAll: _allSkills, color: _themeColor, onShowAll: () => setState(() => _allSkills = true))],
       ],
     );
   }
@@ -240,7 +266,14 @@ class _Hero extends StatelessWidget {
                   builder: (context, _) {
                     final t = intro.value * 0.78; // seconds; ring starts at 0.08s
                     return CustomPaint(
-                      painter: RingsPainter(style: RingsStyle.detail, center: center, scale: s, color: ring, outer: Ripple.at((t - 0.08) / 0.7), spin: spin.value),
+                      painter: RingsPainter(
+                        style: RingsStyle.detail,
+                        center: center,
+                        scale: s,
+                        color: ring,
+                        outer: Ripple.at((t - 0.08) / 0.7),
+                        spin: spin.value,
+                      ),
                     );
                   },
                 ),
@@ -252,7 +285,10 @@ class _Hero extends StatelessWidget {
                   animation: intro,
                   builder: (context, child) {
                     final r = Ripple.at((intro.value * 0.78 - 0.12) / 0.6);
-                    return Opacity(opacity: r.opacity, child: Transform.scale(scale: r.scale, child: child));
+                    return Opacity(
+                      opacity: r.opacity,
+                      child: Transform.scale(scale: r.scale, child: child),
+                    );
                   },
                   child: StickerArt(url: digimon.image, size: 270 * s, shadow: 7 * s, onArt: onArt),
                 ),
@@ -265,13 +301,24 @@ class _Hero extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ComicRoundButton(icon: Icons.arrow_back_rounded, label: 'Back', onPressed: () => Navigator.of(context).maybePop()),
-                    ComicTag('${digimonNo(digimon.id)} / ${formatCount(total)}', rotation: -3, fontSize: 13, weight: 700, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4)),
+                    ComicTag(
+                      '${digimonNo(digimon.id)} / ${formatCount(total)}',
+                      rotation: -3,
+                      fontSize: 13,
+                      weight: 700,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    ),
                     ComicRoundButton(
                       icon: saved ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                       label: saved ? 'Remove ${digimon.name} from saved' : 'Save ${digimon.name}',
                       color: saved ? Comic.swatches[2] : Comic.white,
                       iconColor: saved ? Comic.white : Comic.ink,
-                      onPressed: digimon.id == null ? null : () => favorites.toggle(digimon.id!),
+                      onPressed: digimon.id == null
+                          ? null
+                          : () {
+                              favorites.toggle(digimon.id!);
+                              context.read<AppAnalytics>().favoriteToggled(digimon.id!, added: !saved);
+                            },
                     ),
                   ],
                 ),
@@ -305,7 +352,11 @@ class _ProfileBubble extends StatelessWidget {
             height: 32,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: on ? Comic.ink : Comic.white, borderRadius: BorderRadius.circular(6), border: Border.all(color: Comic.ink, width: 3)),
+            decoration: BoxDecoration(
+              color: on ? Comic.ink : Comic.white,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Comic.ink, width: 3),
+            ),
             child: Text(label, style: Comic.sansStyle(12, weight: 800, color: on ? Comic.yellow : Comic.ink, letterSpacing: 0.6)),
           ),
         ),
@@ -339,7 +390,13 @@ class _ProfileBubble extends StatelessWidget {
             child: Container(
               width: 24,
               height: 24,
-              decoration: const BoxDecoration(color: Comic.white, border: Border(left: BorderSide(color: Comic.ink, width: 4), top: BorderSide(color: Comic.ink, width: 4))),
+              decoration: const BoxDecoration(
+                color: Comic.white,
+                border: Border(
+                  left: BorderSide(color: Comic.ink, width: 4),
+                  top: BorderSide(color: Comic.ink, width: 4),
+                ),
+              ),
             ),
           ),
         ),
@@ -397,10 +454,7 @@ class _StageTrack extends StatelessWidget {
             ],
           ],
         ),
-        if (current < 0 && level != 'N/A') ...[
-          const SizedBox(height: 8),
-          Text('Stage: ${level.toUpperCase()}', style: Comic.sansStyle(12, weight: 800)),
-        ],
+        if (current < 0 && level != 'N/A') ...[const SizedBox(height: 8), Text('Stage: ${level.toUpperCase()}', style: Comic.sansStyle(12, weight: 800))],
       ],
     );
   }
@@ -417,21 +471,33 @@ class _Numbers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget tile(String label, String value, {Color color = Comic.white}) => ComicPanel(
-          color: color,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: Comic.sansStyle(12, weight: 800, color: Comic.muted, letterSpacing: 0.7)),
-              Slant(child: Text(value, style: Comic.displayStyle(34))),
-            ],
-          ),
-        );
+      color: color,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Comic.sansStyle(12, weight: 800, color: Comic.muted, letterSpacing: 0.7)),
+          Slant(child: Text(value, style: Comic.displayStyle(34))),
+        ],
+      ),
+    );
     return Column(
       children: [
-        Row(children: [Expanded(child: tile('SKILLS', '$skills')), const SizedBox(width: 12), Expanded(child: tile('EVOLVES INTO', '$into', color: Comic.yellow))]),
+        Row(
+          children: [
+            Expanded(child: tile('SKILLS', '$skills')),
+            const SizedBox(width: 12),
+            Expanded(child: tile('EVOLVES INTO', '$into', color: Comic.yellow)),
+          ],
+        ),
         const SizedBox(height: 12),
-        Row(children: [Expanded(child: tile('EVOLVES FROM', '$from')), const SizedBox(width: 12), Expanded(child: tile('X-ANTIBODY', xAntibody ? 'YES' : 'NO'))]),
+        Row(
+          children: [
+            Expanded(child: tile('EVOLVES FROM', '$from')),
+            const SizedBox(width: 12),
+            Expanded(child: tile('X-ANTIBODY', xAntibody ? 'YES' : 'NO')),
+          ],
+        ),
       ],
     );
   }
@@ -456,7 +522,11 @@ class _Fields extends StatelessWidget {
             for (final f in fields)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: Comic.white, borderRadius: BorderRadius.circular(999), border: Border.all(color: Comic.ink, width: 3)),
+                decoration: BoxDecoration(
+                  color: Comic.white,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: Comic.ink, width: 3),
+                ),
                 child: Text(f, style: Comic.sansStyle(14, weight: 700)),
               ),
           ],
@@ -495,17 +565,30 @@ class _EvolutionLine extends StatelessWidget {
                   border: Border.all(color: Comic.ink, width: 3),
                   boxShadow: isCurrent ? const [BoxShadow(color: Comic.ink, offset: Offset(3, 3))] : null,
                 ),
-                child: ClipOval(child: Center(child: StickerArt(url: image, size: size - 8, shadow: 0))),
+                child: ClipOval(
+                  child: Center(
+                    child: StickerArt(url: image, size: size - 8, shadow: 0),
+                  ),
+                ),
               ),
               const SizedBox(height: 6),
-              Text(name.toUpperCase(), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: Comic.sansStyle(10, weight: 800, height: 1.15)),
+              Text(
+                name.toUpperCase(),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Comic.sansStyle(10, weight: 800, height: 1.15),
+              ),
             ],
           ),
         ),
       );
     }
 
-    Widget arrow() => Padding(padding: const EdgeInsets.only(top: 16), child: Text('›', style: Comic.displayStyle(20)));
+    Widget arrow() => Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Text('›', style: Comic.displayStyle(20)),
+    );
     void open(EvolutionLink e) => openDetail(context, Digimon(id: e.id, name: DigimonUtils.formattedName(e.name), image: e.imageUrl));
 
     final nodes = <Widget>[
@@ -560,7 +643,11 @@ class _Skills extends StatelessWidget {
                   width: 36,
                   height: 36,
                   alignment: Alignment.center,
-                  decoration: BoxDecoration(color: badge[i % badge.length], shape: BoxShape.circle, border: Border.all(color: Comic.ink, width: 3)),
+                  decoration: BoxDecoration(
+                    color: badge[i % badge.length],
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Comic.ink, width: 3),
+                  ),
                   child: Text('${i + 1}'.padLeft(2, '0'), style: Comic.sansStyle(13, weight: 800)),
                 ),
                 const SizedBox(width: 12),
@@ -569,7 +656,8 @@ class _Skills extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Slant(child: Text('${shown[i]['skill'] ?? ''}'.toUpperCase(), style: Comic.displayStyle(19, height: 1.1))),
-                      if ('${shown[i]['description'] ?? ''}'.isNotEmpty) Text('${shown[i]['description']}', style: Comic.sansStyle(15, height: 1.45, color: Comic.body)),
+                      if ('${shown[i]['description'] ?? ''}'.isNotEmpty)
+                        Text('${shown[i]['description']}', style: Comic.sansStyle(15, height: 1.45, color: Comic.body)),
                     ],
                   ),
                 ),
